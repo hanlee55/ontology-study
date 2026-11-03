@@ -1,0 +1,241 @@
+{
+  "source": "samples/2026-10-20_internal-dev-sync.txt",
+  "model": "solar-pro4",
+  "extracted_at": "2026-11-03T02:27:37+00:00",
+  "result": {
+    "summary": "가온물산 SSO 기술 검토 완료 및 견적서 발송, 업로드 오류 원인 분석 완료(패치 10/23로 연기), 감사 로그 엑셀 내보내기 CSV 형식으로 11월 말 배포 결정, 다솜병원 Sign 대량 서명 1,000건 상향 및 11월 둘째 주 배포 결정, 다솜병원 Sign 사용 가이드 발송 완료, Insight 차기 버전(12월) Sign 연동 위젯으로 다솜 서명 현황 대시보드 시범 적용 검토.",
+    "participants": [
+      "emp-lee-seoyeon",
+      "emp-park-jihun",
+      "emp-jung-haneul",
+      "emp-song-taeho",
+      "emp-kang-yerin"
+    ],
+    "customers": [
+      "cust-gaon",
+      "cust-dasom"
+    ],
+    "new_entities": [],
+    "updates": [
+      {
+        "evidence": "이서연: SSO 기술 검토는 지난주 화요일에 검토 결과 정리해서 가온에 보냈고, 온프레미스에서도 SAML로 문제없다는 결론이었어요.",
+        "confidence": 0.95,
+        "existing_id": "req-20261006-01",
+        "status": "in_progress",
+        "due_date": null,
+        "note": "SSO 기술 검토 완료, 개발 대기 중"
+      },
+      {
+        "evidence": "이서연: 민수 님 오늘 외근이라 대신 전달하면, 견적서도 지난 금요일에 한 부장님께 메일로 나갔대요. 증설분 포함해서요.",
+        "confidence": 0.95,
+        "existing_id": "ai-20261006-03",
+        "status": "done",
+        "due_date": null,
+        "note": "SSO 견적서 발송 완료"
+      },
+      {
+        "evidence": "이서연: 민수 님 오늘 외근이라 대신 전달하면, 견적서도 지난 금요일에 한 부장님께 메일로 나갔대요. 증설분 포함해서요.",
+        "confidence": 0.95,
+        "existing_id": "ai-20261006-04",
+        "status": "done",
+        "due_date": null,
+        "note": "증설분 포함 견적서 발송 완료"
+      },
+      {
+        "evidence": "박지훈: 업로드 오류는 원인 찾았습니다. 분할 업로드할 때 온프레미스 쪽 프록시 타임아웃이 30초로 짧게 잡혀 있어서 끊기는 거였어요.",
+        "confidence": 0.95,
+        "existing_id": "ai-20261006-01",
+        "status": "done",
+        "due_date": null,
+        "note": "업로드 오류 원인 분석 완료"
+      },
+      {
+        "evidence": "박지훈: 네, 그런데 가온 쪽이 Docs 구버전을 쓰고 있어서 그 버전용으로 따로 빌드를 떠야 했어요. 그래서 이번 주 금요일, 23일로 미뤄야 할 것 같습니다.",
+        "confidence": 0.95,
+        "existing_id": "iss-20261006-01",
+        "status": "in_progress",
+        "due_date": "2026-10-23",
+        "note": "패치 10/23로 연기, 구버전 빌드 필요"
+      },
+      {
+        "evidence": "강예린: 우선 유나 님이 신규 사용자 가이드는 지난 목요일에 병원 쪽에 보내셨고 반응 좋았어요.",
+        "confidence": 0.95,
+        "existing_id": "ai-20261013-01",
+        "status": "done",
+        "due_date": null,
+        "note": "다솜병원 Sign 사용 가이드 발송 완료"
+      },
+      {
+        "evidence": "강예린: 그리고 윤 과장님이 대량 서명 한 번에 천 건까지 올려 달라고 하셨는데, 부하 테스트 결과 어떻게 나왔어요? / 박지훈: 천 건까지는 응답 시간 문제없었습니다. 큐 처리만 조금 손보면 돼요.",
+        "confidence": 0.95,
+        "existing_id": "ai-20261013-03",
+        "status": "in_progress",
+        "due_date": null,
+        "note": "부하 테스트 완료, 큐 처리 개선 필요"
+      },
+      {
+        "evidence": "강예린: 그리고 윤 과장님이 대량 서명 한 번에 천 건까지 올려 달라고 하셨는데, 부하 테스트 결과 어떻게 나왔어요? / 박지훈: 천 건까지는 응답 시간 문제없었습니다. 큐 처리만 조금 손보면 돼요.",
+        "confidence": 0.95,
+        "existing_id": "req-20261013-01",
+        "status": "in_progress",
+        "due_date": null,
+        "note": "대량 서명 1,000건 상향 검토 진행 중"
+      }
+    ],
+    "knowledge": [
+      {
+        "evidence": "정하늘: SSO 관련해서 보안팀 정책 하나 공유드리면, 외부 IdP 연동하는 고객은 세션 타임아웃을 30분 이하로 강제해야 합니다. 이건 Docs 전 고객 공통이에요.",
+        "confidence": 0.95,
+        "about": "정하늘",
+        "statement": "외부 IdP 연동 고객은 세션 타임아웃 30분 이하 강제, Docs 전 고객 공통 보안 정책"
+      },
+      {
+        "evidence": "송태호: 다솜에서 대시보드 얘기 나왔다고 해서요. Insight 차기 버전이 12월에 나오는데 거기 Sign 연동 위젯이 들어갑니다.",
+        "confidence": 0.95,
+        "about": "송태호",
+        "statement": "누리 Insight 차기 버전 12월 출시 예정, Sign 연동 위젯 포함"
+      },
+      {
+        "evidence": "이서연: 그런데 가온 연말 감사도 있고 다른 고객 문의도 있어서, 감사 로그 내보내기 기능은 CSV 형식으로 앞당겨서 11월 말에 배포하는 걸로 결정하겠습니다.",
+        "confidence": 0.95,
+        "about": "이서연",
+        "statement": "누리 Docs 감사 로그 엑셀 내보내기 기능은 원래 내년 계획이었으나 CSV 형식으로 11월 말 배포로 앞당김"
+      }
+    ],
+    "action_items": [
+      {
+        "evidence": "이서연: 알겠어요. 23일로 가고 가온에는 제가 오늘 중으로 공유할게요.",
+        "confidence": 0.95,
+        "ref": "new:ai-20261020-01",
+        "description": "가온물산에 업로드 오류 패치 일정(10/23)을 오늘 중으로 공유한다.",
+        "assignees": [
+          "emp-lee-seoyeon"
+        ],
+        "due_date": "2026-10-20",
+        "status": "open",
+        "priority": "high",
+        "relates_to": [
+          "iss-20261006-01"
+        ]
+      },
+      {
+        "evidence": "이서연: 그건 민수 님한테 말해 뒀어요. 그분이 내일까지 한 부장님께 다시 요청하기로 했어요.",
+        "confidence": 0.95,
+        "ref": "new:ai-20261020-02",
+        "description": "김민수가 한 부장님께 SSO 테스트용 IdP 메타데이터와 테스트 계정 재요청한다.",
+        "assignees": [
+          "emp-kim-minsu"
+        ],
+        "due_date": "2026-10-21",
+        "status": "open",
+        "priority": "high",
+        "relates_to": [
+          "req-20261006-01"
+        ]
+      },
+      {
+        "evidence": "정하늘: SSO 설정에 대한 보안 검토는 제가 10월 30일까지 끝내 놓겠습니다.",
+        "confidence": 0.95,
+        "ref": "new:ai-20261020-03",
+        "description": "정하늘이 SSO 설정에 대한 보안 검토를 10월 30일까지 완료한다.",
+        "assignees": [
+          "emp-jung-haneul"
+        ],
+        "due_date": "2026-10-30",
+        "status": "open",
+        "priority": "high",
+        "relates_to": [
+          "req-20261006-01"
+        ]
+      },
+      {
+        "evidence": "강예린: 좋네요. 태호 님, 시범 적용 범위 정리해서 다음 주 화요일까지 공유해 주실 수 있을까요? / 송태호: 네, 그때까지 정리하겠습니다.",
+        "confidence": 0.95,
+        "ref": "new:ai-20261020-04",
+        "description": "송태호가 다솜병원 Sign 서명 현황 대시보드 시범 적용 범위를 다음 주 화요일(10/27)까지 정리하여 공유한다.",
+        "assignees": [
+          "emp-song-taeho"
+        ],
+        "due_date": "2026-10-27",
+        "status": "open",
+        "priority": "medium",
+        "relates_to": [
+          "cust-dasom",
+          "svc-insight"
+        ]
+      },
+      {
+        "evidence": "강예린: 네, 오늘 오후에 윤 과장님께 일정 회신드리겠습니다.",
+        "confidence": 0.95,
+        "ref": "new:ai-20261020-05",
+        "description": "강예린이 다솜병원 윤 과장님께 대량 서명 1,000건 상향 및 11월 둘째 주 배포 일정을 오늘 오후 회신한다.",
+        "assignees": [
+          "emp-kang-yerin"
+        ],
+        "due_date": "2026-10-20",
+        "status": "open",
+        "priority": "high",
+        "relates_to": [
+          "req-20261013-01"
+        ]
+      }
+    ],
+    "customer_requests": [
+      {
+        "evidence": "강예린: 그리고 윤 과장님이 대량 서명 한 번에 천 건까지 올려 달라고 하셨는데, 부하 테스트 결과 어떻게 나왔어요?",
+        "confidence": 0.95,
+        "ref": "new:req-20261020-01",
+        "description": "다솜병원이 누리 Sign 대량 서명 기능을 한 번에 200건에서 1,000건까지 상향 요청 (11월 건강검진 시즌 전 적용 희망).",
+        "requested_by": "cust-dasom",
+        "concerns": [
+          "feat-sign-bulk"
+        ],
+        "priority": "high",
+        "status": "in_progress"
+      }
+    ],
+    "issues": [
+      {
+        "evidence": "박지훈: 네, 그런데 가온 쪽이 Docs 구버전을 쓰고 있어서 그 버전용으로 따로 빌드를 떠야 했어요. 그래서 이번 주 금요일, 23일로 미뤄야 할 것 같습니다.",
+        "confidence": 0.95,
+        "ref": "new:iss-20261020-01",
+        "description": "가온물산이 Docs 구버전을 사용 중이라 업로드 오류 패치를 구버전용으로 별도 빌드해야 하여 패치 일정이 10/23으로 연기됨.",
+        "reported_by": "cust-gaon",
+        "affects": [
+          "svc-docs"
+        ],
+        "assignees": [
+          "emp-park-jihun"
+        ],
+        "priority": "high",
+        "status": "in_progress"
+      }
+    ],
+    "decisions": [
+      {
+        "evidence": "이서연: 그럼 일괄 서명 최대 건수는 천 건으로 상향하고, 11월 둘째 주 정기 배포에 넣는 걸로 하죠. 검진 시즌 전에 맞출 수 있어요.",
+        "confidence": 0.95,
+        "description": "누리 Sign 대량 서명 최대 건수를 200건에서 1,000건으로 상향하고 11월 둘째 주 정기 배포에 포함.",
+        "decided_by": [
+          "emp-lee-seoyeon"
+        ],
+        "relates_to": [
+          "feat-sign-bulk",
+          "cust-dasom"
+        ]
+      },
+      {
+        "evidence": "이서연: 그런데 가온 연말 감사도 있고 다른 고객 문의도 있어서, 감사 로그 내보내기 기능은 CSV 형식으로 앞당겨서 11월 말에 배포하는 걸로 결정하겠습니다.",
+        "confidence": 0.95,
+        "description": "누리 Docs 감사 로그 내보내기 기능을 엑셀 대신 CSV 형식으로 11월 말에 배포하기로 결정.",
+        "decided_by": [
+          "emp-lee-seoyeon"
+        ],
+        "relates_to": [
+          "feat-docs-audit",
+          "cust-gaon"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "source": "samples/2026-10-06_gaon-weekly-sso.txt",
+  "model": "solar-pro4",
+  "extracted_at": "2026-11-03T02:26:39+00:00",
+  "result": {
+    "summary": "가온물산 주간 미팅에서 업로드 타임아웃 오류 원인 분석 및 패치 일정, SAML 기반 SSO 연동 진행, 온프레미스 설치형 유지, SSO/증설 견적 발송, 감사 로그 엑셀 내보내기 검토 등이 논의됨.",
+    "participants": [
+      "emp-kim-minsu",
+      "emp-lee-seoyeon",
+      "emp-park-jihun",
+      "contact-han-doyun"
+    ],
+    "customers": [
+      "cust-gaon"
+    ],
+    "new_entities": [],
+    "updates": [],
+    "knowledge": [
+      {
+        "evidence": "한도윤: 아시겠지만 저희는 문서가 사외로 나가면 안 돼서 지금처럼 온프레미스 설치형으로만 써야 합니다. 클라우드 버전은 내부 규정상 불가예요.",
+        "confidence": 0.95,
+        "about": "cust-gaon",
+        "statement": "가온물산은 문서 사외 반출 금지 정책으로 인해 온프레미스 설치형만 사용 가능하며, 클라우드 버전은 내부 규정상 사용할 수 없다."
+      },
+      {
+        "evidence": "한도윤: 그리고 로그인 건인데요, 저희가 이번에 사내 계정을 통합 계정 시스템으로 다 옮겼어요. Docs도 따로 아이디 만들지 말고 SSO로 붙었으면 합니다.",
+        "confidence": 0.9,
+        "about": "cust-gaon",
+        "statement": "가온물산은 사내 계정을 통합 계정 시스템으로 이전했으며, Docs는 별도 계정 생성 없이 SSO로 연동하기를 원한다."
+      },
+      {
+        "evidence": "한도윤: 내년 1분기에 사용자가 300명 정도 늘어요. 지금 500명이니까 800명 규모가 됩니다.",
+        "confidence": 0.9,
+        "about": "cust-gaon",
+        "statement": "가온물산은 현재 500명 규모에서 내년 1분기에 300명이 증가해 총 800명 규모가 될 예정이다."
+      },
+      {
+        "evidence": "한도윤: 연말 감사가 12월 중순이라 그 전에는 꼭 돼야 해서, 저희 쪽에선 이게 우선순위 제일 높아요.",
+        "confidence": 0.9,
+        "about": "cust-gaon",
+        "statement": "가온물산은 12월 중순 연말 감사가 있어 SSO 연동을 그 전에 완료해야 하며, 이것이 현재 최우선 과제다."
+      }
+    ],
+    "action_items": [
+      {
+        "evidence": "박지훈: 네 부장님, 로그 받아 봤는데 대용량 파일 분할 업로드 쪽에서 타임아웃이 나는 것 같습니다. 오늘 오후에 1차 원인 분석 결과 메일로 드릴게요.",
+        "confidence": 0.95,
+        "ref": "new:ai-1",
+        "description": "대용량 파일 분할 업로드 타임아웃 원인 1차 분석 결과를 오늘 오후 메일로 전달한다.",
+        "assignees": [
+          "emp-park-jihun"
+        ],
+        "due_date": "2026-10-06",
+        "status": "open",
+        "priority": "high",
+        "relates_to": [
+          "new:issue-1"
+        ]
+      },
+      {
+        "evidence": "이서연: 네, 온프레미스 기준으로 기술 검토하겠습니다. 저희 쪽에서 다음 주 화요일까지 검토 결과 공유드릴게요.",
+        "confidence": 0.95,
+        "ref": "new:ai-2",
+        "description": "온프레미스 설치형 기준으로 SAML SSO 연동 기술 검토를 수행하고 다음 주 화요일까지 결과를 공유한다.",
+        "assignees": [
+          "emp-lee-seoyeon"
+        ],
+        "due_date": "2026-10-13",
+        "status": "open",
+        "priority": "high",
+        "relates_to": [
+          "new:cr-1"
+        ]
+      },
+      {
+        "evidence": "김민수: SSO는 엔터프라이즈 옵션이라 별도 견적이 나갑니다. 제가 이번 주 금요일까지 견적서 정리해서 메일로 보내드리겠습니다.",
+        "confidence": 0.95,
+        "ref": "new:ai-3",
+        "description": "SSO 엔터프라이즈 옵션 별도 견적서를 이번 주 금요일까지 정리하여 메일로 발송한다.",
+        "assignees": [
+          "emp-kim-minsu"
+        ],
+        "due_date": "2026-10-10",
+        "status": "open",
+        "priority": "high",
+        "relates_to": [
+          "new:cr-1"
+        ]
+      },
+      {
+        "evidence": "김민수: 그럼 증설 견적도 같이 넣어 드릴게요.",
+        "confidence": 0.9,
+        "ref": "new:ai-4",
+        "description": "내년 1분기 800명 규모 증설을 반영한 견적을 SSO 견적과 함께 넣어 발송한다.",
+        "assignees": [
+          "emp-kim-minsu"
+        ],
+        "due_date": "2026-10-10",
+        "status": "open",
+        "priority": "medium",
+        "relates_to": [
+          "new:cr-1"
+        ]
+      },
+      {
+        "evidence": "이서연: 감사 로그 내보내기는 로드맵에 들어가 있는지 확인해 보고 말씀드릴게요.",
+        "confidence": 0.9,
+        "ref": "new:ai-5",
+        "description": "누리 Docs 감사 로그 엑셀 내보내기 기능이 로드맵에 포함되어 있는지 확인하여 고객에게 공유한다.",
+        "assignees": [
+          "emp-lee-seoyeon"
+        ],
+        "due_date": null,
+        "status": "open",
+        "priority": "low",
+        "relates_to": [
+          "new:cr-2"
+        ]
+      }
+    ],
+    "customer_requests": [
+      {
+        "evidence": "한도윤: 그리고 로그인 건인데요, 저희가 이번에 사내 계정을 통합 계정 시스템으로 다 옮겼어요. Docs도 따로 아이디 만들지 말고 SSO로 붙었으면 합니다.",
+        "confidence": 0.95,
+        "ref": "new:cr-1",
+        "description": "가온물산이 사내 통합 계정 시스템 이전 완료에 따라 Docs에 별도 계정 생성 없이 SSO(SAML 방식)로 연동하기를 요청함.",
+        "requested_by": "cust-gaon",
+        "concerns": [
+          "feat-docs-sso"
+        ],
+        "priority": "high",
+        "status": "open"
+      },
+      {
+        "evidence": "한도윤: 마지막으로 감사팀에서 감사 로그를 엑셀로 내려받을 수 있으면 좋겠다고 하더라고요. 급한 건 아닙니다.",
+        "confidence": 0.9,
+        "ref": "new:cr-2",
+        "description": "가온물산 감사팀에서 누리 Docs 감사 로그를 엑셀로 내려받을 수 있는 기능을 요청함(긴급하지 않음).",
+        "requested_by": "cust-gaon",
+        "concerns": [
+          "feat-docs-audit"
+        ],
+        "priority": "low",
+        "status": "open"
+      }
+    ],
+    "issues": [
+      {
+        "evidence": "한도윤: 어제부터 Docs에 100메가 넘는 도면 파일 올리면 중간에 실패가 나요. 설계팀에서 아침마다 민원이 들어옵니다.",
+        "confidence": 0.95,
+        "ref": "new:issue-1",
+        "description": "가온물산에서 어제부터 Docs에 100MB가 넘는 도면 파일 업로드 시 중간에 실패하는 오류가 발생 중이며, 설계팀에서 매일 민원이 들어오고 있음.",
+        "reported_by": "cust-gaon",
+        "affects": [
+          "svc-docs"
+        ],
+        "assignees": [
+          "emp-park-jihun"
+        ],
+        "priority": "high",
+        "status": "open"
+      }
+    ],
+    "decisions": [
+      {
+        "evidence": "이서연: SSO 연동은 SAML 2.0이랑 OIDC 둘 다 되는데요, 가온 쪽 계정 시스템이면 SAML이 검증된 사례가 더 많습니다. / 한도윤: 저희 보안 쪽도 SAML 선호해요. 그걸로 가시죠. / 김민수: 네, 그럼 SAML 방식으로 진행하는 걸로 정리하겠습니다.",
+        "confidence": 0.95,
+        "description": "가온물산 Docs SSO 연동은 SAML 2.0 방식으로 진행하기로 결정함.",
+        "decided_by": [
+          "emp-lee-seoyeon",
+          "contact-han-doyun",
+          "emp-kim-minsu"
+        ],
+        "relates_to": [
+          "new:cr-1"
+        ]
+      },
+      {
+        "evidence": "박지훈: 원인 확정되면 패치는 다음 주 금요일까지 드리는 걸 목표로 하겠습니다.",
+        "confidence": 0.9,
+        "description": "업로드 타임아웃 오류 원인 확정 후 패치를 다음 주 금요일(2026-10-16)까지 제공하는 것을 목표로 함.",
+        "decided_by": [
+          "emp-park-jihun"
+        ],
+        "relates_to": [
+          "new:issue-1"
+        ]
+      }
+    ]
+  }
+}

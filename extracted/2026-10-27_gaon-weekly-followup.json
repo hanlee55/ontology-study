@@ -1,0 +1,212 @@
+{
+  "source": "samples/2026-10-27_gaon-weekly-followup.txt",
+  "model": "solar-pro4",
+  "extracted_at": "2026-11-03T02:28:10+00:00",
+  "result": {
+    "summary": "가온물산 주간 후속 점검 미팅. 업로드 오류 패치 완료로 이슈 종료, SSO 연동 테스트 재개 및 11/13 완료 목표, 감사 로그 CSV 내보내기 11월 말 배포, 12월 둘째 주 토요일 작업 창에 SSO·내보내기 동시 반영 계획, 증설 견적 800명 기준 내년 1/1 시작, 김민수가 다음 주 화요일까지 계약서 초안 송부 예정.",
+    "participants": [
+      "김민수",
+      "이서연",
+      "박지훈",
+      "한도윤"
+    ],
+    "customers": [
+      "cust-gaon"
+    ],
+    "new_entities": [],
+    "updates": [
+      {
+        "evidence": "[00:00:17] 박지훈: 네, 23일 금요일 저녁에 구버전용 패치 적용했고요, 주말 동안 300메가 도면까지 테스트했는데 실패 한 건도 없었습니다.",
+        "confidence": 0.95,
+        "existing_id": "iss-20261006-01",
+        "status": "done",
+        "due_date": null,
+        "note": "업로드 오류 패치 적용 및 테스트 완료로 이슈 종료"
+      },
+      {
+        "evidence": "[00:00:30] 한도윤: 저희 설계팀도 어제부터 민원이 없다고 하더라고요. 그 건은 해결된 걸로 보겠습니다.",
+        "confidence": 0.95,
+        "existing_id": "iss-20261020-01",
+        "status": "done",
+        "due_date": null,
+        "note": "구버전 패치 일정 연기 이슈도 함께 종료"
+      },
+      {
+        "evidence": "[00:00:44] 김민수: 다음은 SSO인데요, 테스트용 메타데이터랑 계정 지난주 수요일에 보내 주셔서 감사합니다. 멈춰 있던 연동 테스트 다시 시작했습니다.",
+        "confidence": 0.95,
+        "existing_id": "ai-20261020-02",
+        "status": "done",
+        "due_date": null,
+        "note": "SSO 테스트용 IdP 메타데이터·계정 재요청 완료"
+      },
+      {
+        "evidence": "[00:01:03] 박지훈: 지금 로그인까지는 정상으로 붙었고요, 권한 그룹 매핑만 남았습니다. 연동 테스트는 11월 13일까지 끝내겠습니다.",
+        "confidence": 0.95,
+        "existing_id": "ai-20261020-03",
+        "status": "in_progress",
+        "due_date": "2026-11-13",
+        "note": "SSO 연동 테스트 진행 중, 기한 11/13으로 갱신"
+      },
+      {
+        "evidence": "[00:01:14] 이서연: 그리고 저희 보안팀 정책상 SSO 쓰시면 세션 타임아웃이 30분으로 고정됩니다. 미리 말씀드려요.",
+        "confidence": 0.95,
+        "existing_id": "ai-20261020-03",
+        "status": "in_progress",
+        "due_date": "2026-10-30",
+        "note": "보안 검토 10/30 완료 예정은 유지, SSO 세션 타임아웃 30분 정책 안내"
+      },
+      {
+        "evidence": "[00:01:29] 이서연: 지난번에 말씀하신 감사 로그 엑셀 다운로드는요, 감사 로그 내보내기 기능을 CSV로 11월 말에 배포하기로 했습니다.",
+        "confidence": 0.95,
+        "existing_id": "ai-20261006-05",
+        "status": "in_progress",
+        "due_date": "2026-11-30",
+        "note": "감사 로그 엑셀 내보내기 기능 CSV로 11월 말 배포 결정, 기존 할 일 진행 중"
+      },
+      {
+        "evidence": "[00:02:10] 한도윤: 좋습니다. 그리고 증설 견적은 내부 품의 올렸어요. 800명 기준으로 내년 1월 1일부터 시작하는 걸로요.",
+        "confidence": 0.95,
+        "existing_id": "req-20261006-01",
+        "status": "in_progress",
+        "due_date": null,
+        "note": "가온물산 SSO 연동 요청 진행 중, 증설 견적 800명 기준 내년 1/1 시작"
+      }
+    ],
+    "knowledge": [
+      {
+        "evidence": "[00:01:14] 이서연: 그리고 저희 보안팀 정책상 SSO 쓰시면 세션 타임아웃이 30분으로 고정됩니다. 미리 말씀드려요.",
+        "confidence": 0.95,
+        "about": "dept-security",
+        "statement": "누리클라우드 보안팀 정책상 SSO 사용 시 세션 타임아웃이 30분으로 고정된다."
+      },
+      {
+        "evidence": "[00:01:29] 이서연: 지난번에 말씀하신 감사 로그 엑셀 다운로드는요, 감사 로그 내보내기 기능을 CSV로 11월 말에 배포하기로 했습니다. 엑셀에서 바로 여실 수 있어요.",
+        "confidence": 0.95,
+        "about": "feat-docs-audit",
+        "statement": "누리 Docs 감사 로그 내보내기 기능이 CSV 형식으로 11월 말 배포 예정이며, 엑셀에서 바로 열 수 있다."
+      },
+      {
+        "evidence": "[00:01:49] 한도윤: 운영 반영은 저희가 매달 둘째 주 토요일에만 작업 창이 열려서요, 온프레미스 업데이트는 그 날짜에 맞춰 주셔야 해요.",
+        "confidence": 0.95,
+        "about": "cust-gaon",
+        "statement": "가온물산은 매달 둘째 주 토요일만 온프레미스 업데이트 작업 창이 열려 있어, 해당 날짜에 맞춰 업데이트를 진행해야 한다."
+      },
+      {
+        "evidence": "[00:02:10] 한도윤: 좋습니다. 그리고 증설 견적은 내부 품의 올렸어요. 800명 기준으로 내년 1월 1일부터 시작하는 걸로요.",
+        "confidence": 0.95,
+        "about": "cust-gaon",
+        "statement": "가온물산 증설 견적은 800명 기준으로 내부 품의가 올라갔고, 내년 1월 1일부터 시작하는 것으로 계획되었다."
+      }
+    ],
+    "action_items": [
+      {
+        "evidence": "[00:02:21] 김민수: 감사합니다. 그럼 제가 계약서 초안 다음 주 화요일까지 보내드리겠습니다.",
+        "confidence": 0.95,
+        "ref": "new:ai-20261027-01",
+        "description": "가온물산 계약서 초안을 다음 주 화요일(10/27 기준 다음 주 화요일 = 11/3)까지 작성하여 송부한다.",
+        "assignees": [
+          "emp-kim-minsu"
+        ],
+        "due_date": "2026-11-03",
+        "status": "open",
+        "priority": "high",
+        "relates_to": [
+          "req-20261006-01"
+        ]
+      },
+      {
+        "evidence": "[00:02:00] 박지훈: 네, 그럼 SSO랑 내보내기 기능은 12월 둘째 주 토요일 작업 창에 같이 반영하는 걸로 계획 잡겠습니다.",
+        "confidence": 0.95,
+        "ref": "new:ai-20261027-02",
+        "description": "SSO 연동 및 감사 로그 CSV 내보내기 기능을 가온물산의 12월 둘째 주 토요일 작업 창에 맞춰 온프레미스 업데이트로 반영한다.",
+        "assignees": [
+          "emp-park-jihun"
+        ],
+        "due_date": "2026-12-12",
+        "status": "open",
+        "priority": "high",
+        "relates_to": [
+          "req-20261006-01",
+          "req-20261006-02"
+        ]
+      },
+      {
+        "evidence": "[00:02:35] 김민수: 오늘 감사합니다. 다음 주에 SSO 테스트 진행 상황 다시 공유드리겠습니다.",
+        "confidence": 0.95,
+        "ref": "new:ai-20261027-03",
+        "description": "다음 주 미팅에서 SSO 연동 테스트 진행 상황을 공유한다.",
+        "assignees": [
+          "emp-kim-minsu"
+        ],
+        "due_date": "2026-11-03",
+        "status": "open",
+        "priority": "medium",
+        "relates_to": [
+          "ai-20261020-03"
+        ]
+      }
+    ],
+    "customer_requests": [
+      {
+        "evidence": "[00:01:29] 이서연: 지난번에 말씀하신 감사 로그 엑셀 다운로드는요, 감사 로그 내보내기 기능을 CSV로 11월 말에 배포하기로 했습니다.",
+        "confidence": 0.95,
+        "ref": "req-20261006-02",
+        "description": "가온물산 감사팀에서 누리 Docs 감사 로그를 엑셀로 내려받을 수 있는 기능 요청 (CSV로 11월 말 배포 예정).",
+        "requested_by": "cust-gaon",
+        "concerns": [
+          "feat-docs-audit"
+        ],
+        "priority": "low",
+        "status": "in_progress"
+      }
+    ],
+    "issues": [],
+    "decisions": [
+      {
+        "evidence": "[00:00:30] 한도윤: 저희 설계팀도 어제부터 민원이 없다고 하더라고요. 그 건은 해결된 걸로 보겠습니다.",
+        "confidence": 0.95,
+        "description": "가온물산 업로드 오류 건은 패치 적용 및 테스트 완료로 해결된 것으로 간주한다.",
+        "decided_by": [
+          "cust-gaon"
+        ],
+        "relates_to": [
+          "iss-20261006-01",
+          "iss-20261020-01"
+        ]
+      },
+      {
+        "evidence": "[00:01:03] 박지훈: 지금 로그인까지는 정상으로 붙었고요, 권한 그룹 매핑만 남았습니다. 연동 테스트는 11월 13일까지 끝내겠습니다.",
+        "confidence": 0.95,
+        "description": "SSO 연동 테스트는 11월 13일까지 완료하기로 한다.",
+        "decided_by": [
+          "dept-platform"
+        ],
+        "relates_to": [
+          "ai-20261020-03"
+        ]
+      },
+      {
+        "evidence": "[00:02:00] 박지훈: 네, 그럼 SSO랑 내보내기 기능은 12월 둘째 주 토요일 작업 창에 같이 반영하는 걸로 계획 잡겠습니다.",
+        "confidence": 0.95,
+        "description": "SSO 연동 및 감사 로그 CSV 내보내기 기능은 가온물산의 12월 둘째 주 토요일 작업 창에 맞춰 온프레미스 업데이트로 반영한다.",
+        "decided_by": [
+          "dept-platform"
+        ],
+        "relates_to": [
+          "ai-20261027-02"
+        ]
+      },
+      {
+        "evidence": "[00:02:10] 한도윤: 좋습니다. 그리고 증설 견적은 내부 품의 올렸어요. 800명 기준으로 내년 1월 1일부터 시작하는 걸로요.",
+        "confidence": 0.95,
+        "description": "가온물산 증설은 800명 기준으로 내년 1월 1일부터 시작하는 것으로 결정되었다.",
+        "decided_by": [
+          "cust-gaon"
+        ],
+        "relates_to": [
+          "req-20261006-01"
+        ]
+      }
+    ]
+  }
+}
