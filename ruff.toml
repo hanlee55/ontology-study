@@ -1,0 +1,20 @@
+target-version = "py314"
+line-length = 120
+
+[lint]
+select = [
+    "E",   # pycodestyle
+    "W",
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "RUF",
+]
+# 한글 주석·문자열의 전각 문자(·, → 등)는 의도한 것
+ignore = ["RUF001", "RUF002", "RUF003"]
+
+[lint.per-file-ignores]
+# LLM 프롬프트 문자열은 줄바꿈하면 프롬프트 내용이 바뀌므로 길이 제한 제외
+"meeting_kg/extract.py" = ["E501"]
