@@ -1,0 +1,20 @@
+# title: 고객사별 요청·이슈·할 일 이력
+PREFIX ont:  <https://example.org/ontology-study/ont#>
+PREFIX ex:   <https://example.org/ontology-study/id/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?고객사 ?회의일 ?종류 ?내용 ?현재상태 WHERE {
+  ?cust a ont:Customer ; rdfs:label ?고객사 .
+  ?item a ?cls ;
+        ont:description ?내용 ;
+        ont:status ?st ;
+        ont:createdIn ?m .
+  { ?item ont:requestedBy ?cust } UNION { ?item ont:reportedBy ?cust }
+  UNION { ?item ont:relatesTo ?cust } UNION { ?item ont:affects ?cust }
+  VALUES (?cls ?종류) {
+    (ont:CustomerRequest "고객 요청") (ont:Issue "이슈") (ont:ActionItem "할 일")
+  }
+  ?m ont:meetingDate ?회의일 .
+  ?st rdfs:label ?현재상태 . FILTER (lang(?현재상태) = "ko")
+}
+ORDER BY ?고객사 ?회의일 ?종류

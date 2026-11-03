@@ -1,0 +1,20 @@
+# title: 부서별 미완료 할 일 (기한순)
+PREFIX ont:  <https://example.org/ontology-study/ont#>
+PREFIX ex:   <https://example.org/ontology-study/id/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?부서 ?담당 ?할일 ?상태 ?기한 ?id WHERE {
+  ?항목 a ont:ActionItem ;
+        ont:description ?할일 ;
+        ont:status ?st ;
+        ont:assignedTo ?who .
+  FILTER (?st NOT IN (ont:Done, ont:Cancelled))
+  # 담당이 직원이면 소속 부서, 부서면 그 부서 자신 (경로 ? = 0번 또는 1번)
+  ?who ont:memberOf? ?dept .
+  ?dept a ont:Department ; rdfs:label ?부서 .
+  ?who rdfs:label ?담당 .
+  ?st rdfs:label ?상태 . FILTER (lang(?상태) = "ko")
+  OPTIONAL { ?항목 ont:dueDate ?기한 }
+  BIND (STRAFTER(STR(?항목), STR(ex:)) AS ?id)
+}
+ORDER BY ?부서 ?기한

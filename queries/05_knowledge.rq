@@ -1,0 +1,18 @@
+# title: 서비스·고객사·사람에 대한 지식 메모
+PREFIX ont:  <https://example.org/ontology-study/ont#>
+PREFIX ex:   <https://example.org/ontology-study/id/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?대상유형 ?대상 ?지식 ?회의일 ?신뢰도 WHERE {
+  ?note a ont:KnowledgeNote ;
+        ont:about ?x ;
+        ont:description ?지식 ;
+        ont:confidence ?신뢰도 ;
+        ont:mentionedIn ?m .
+  ?m ont:meetingDate ?회의일 .
+  ?x rdfs:label ?대상 ; a ?cls .
+  ?cls rdfs:label ?대상유형 .
+  VALUES ?cls { ont:Service ont:Feature ont:Customer ont:Employee ont:CustomerContact ont:Department }
+  FILTER (lang(?대상유형) = "ko")
+}
+ORDER BY ?대상유형 ?대상 ?회의일

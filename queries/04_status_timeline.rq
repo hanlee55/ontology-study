@@ -1,0 +1,20 @@
+# title: 항목별 상태 변경 히스토리 (어느 회의에서 어떻게 바뀌었나)
+PREFIX ont:  <https://example.org/ontology-study/ont#>
+PREFIX ex:   <https://example.org/ontology-study/id/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?항목 ?내용 ?회의일 ?회의 ?변경상태 ?변경기한 ?근거 WHERE {
+  ?upd a ont:StatusUpdate ;
+       ont:updateOf ?item ;
+       ont:newStatus ?st ;
+       ont:recordedIn ?m ;
+       ont:evidence ?근거 .
+  OPTIONAL { ?upd ont:newDueDate ?변경기한 }
+  ?item ont:description ?내용 .
+  ?m ont:meetingDate ?회의일 ; rdfs:label ?회의 .
+  ?st rdfs:label ?변경상태 . FILTER (lang(?변경상태) = "ko")
+  BIND (STRAFTER(STR(?item), STR(ex:)) AS ?항목)
+  # 여러 번 언급된 항목만 보고 싶으면 아래 주석을 해제
+  # { SELECT ?item WHERE { ?u ont:updateOf ?item } GROUP BY ?item HAVING (COUNT(?u) > 1) }
+}
+ORDER BY ?항목 ?회의일

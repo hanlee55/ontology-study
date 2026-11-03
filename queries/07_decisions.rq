@@ -1,0 +1,14 @@
+# title: 결정사항과 관련 대상
+PREFIX ont:  <https://example.org/ontology-study/ont#>
+PREFIX ex:   <https://example.org/ontology-study/id/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?회의일 ?결정 ?관련대상 ?근거 WHERE {
+  ?d a ont:Decision ; ont:description ?결정 ; ont:createdIn ?m ; ont:evidence ?근거 .
+  ?m ont:meetingDate ?회의일 .
+  OPTIONAL {
+    SELECT ?d (GROUP_CONCAT(?label; separator=", ") AS ?관련대상)
+    WHERE { ?d ont:relatesTo ?x . ?x rdfs:label|ont:description ?label } GROUP BY ?d
+  }
+}
+ORDER BY ?회의일

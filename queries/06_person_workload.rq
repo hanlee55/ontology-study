@@ -1,0 +1,21 @@
+# title: 사람별 담당 고객사와 미완료·완료 업무 수
+PREFIX ont:  <https://example.org/ontology-study/ont#>
+PREFIX ex:   <https://example.org/ontology-study/id/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?이름 ?부서 ?담당고객사 ?미완료 ?완료 WHERE {
+  ?p a ont:Employee ; rdfs:label ?이름 ; ont:memberOf/rdfs:label ?부서 .
+  OPTIONAL {
+    SELECT ?p (GROUP_CONCAT(?c; separator=", ") AS ?담당고객사)
+    WHERE { ?p ont:accountManagerOf/rdfs:label ?c } GROUP BY ?p
+  }
+  OPTIONAL {
+    SELECT ?p (COUNT(DISTINCT ?i) AS ?미완료)
+    WHERE { ?i ont:assignedTo ?p ; ont:status ?s . FILTER (?s NOT IN (ont:Done, ont:Cancelled)) } GROUP BY ?p
+  }
+  OPTIONAL {
+    SELECT ?p (COUNT(DISTINCT ?i) AS ?완료)
+    WHERE { ?i ont:assignedTo ?p ; ont:status ont:Done } GROUP BY ?p
+  }
+}
+ORDER BY DESC(?미완료) ?이름

@@ -1,0 +1,23 @@
+# title: [추론] 개발본부 소속 전원이 맡은 미완료 업무 (역관계 hasMember·responsibleFor 사용)
+# 데이터에는 "직원 memberOf 팀", "항목 assignedTo 직원"만 저장되어 있다.
+# hasMember, responsibleFor는 owl:inverseOf로 추론되고, subOrganizationOf는 전이적이다.
+PREFIX ont:  <https://example.org/ontology-study/ont#>
+PREFIX ex:   <https://example.org/ontology-study/id/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?팀 ?담당 ?종류 ?내용 ?기한 WHERE {
+  ?hq rdfs:label "개발본부" .
+  ?team ont:subOrganizationOf ?hq ;
+        rdfs:label ?팀 ;
+        ont:hasMember ?person .
+  ?person rdfs:label ?담당 ;
+          ont:responsibleFor ?item .
+  ?item ont:description ?내용 ;
+        ont:status ?st ;
+        a ?cls .
+  ?cls rdfs:subClassOf ont:TrackedItem ; rdfs:label ?종류 .
+  FILTER (?cls != ont:TrackedItem && lang(?종류) = "ko")
+  FILTER (?st NOT IN (ont:Done, ont:Cancelled))
+  OPTIONAL { ?item ont:dueDate ?기한 }
+}
+ORDER BY ?팀 ?담당 ?기한
