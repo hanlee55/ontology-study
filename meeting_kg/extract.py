@@ -7,7 +7,7 @@ from pathlib import Path
 from openai import OpenAI
 
 from .catalog import Record
-from .config import EXTRACTED_DIR, UPSTAGE_API_KEY, UPSTAGE_BASE_URL, UPSTAGE_MODEL
+from .config import UPSTAGE_API_KEY, UPSTAGE_BASE_URL, UPSTAGE_MODEL
 from .models import MeetingExtraction
 from .transcript import Transcript
 
@@ -99,12 +99,12 @@ def call_llm(transcript: Transcript, catalog: list[Record], tracked: list[Record
     return message.parsed
 
 
-def cache_path(transcript: Transcript) -> Path:
-    return EXTRACTED_DIR / f"{transcript.path.stem}.json"
+def cache_path(transcript: Transcript, directory: Path) -> Path:
+    return directory / f"{transcript.path.stem}.json"
 
 
-def save_extraction(transcript: Transcript, extraction: MeetingExtraction) -> Path:
-    path = cache_path(transcript)
+def save_extraction(transcript: Transcript, extraction: MeetingExtraction, directory: Path) -> Path:
+    path = cache_path(transcript, directory)
     path.parent.mkdir(parents=True, exist_ok=True)
     record = {
         "source": f"samples/{transcript.path.name}",
@@ -116,8 +116,8 @@ def save_extraction(transcript: Transcript, extraction: MeetingExtraction) -> Pa
     return path
 
 
-def load_extraction(transcript: Transcript) -> tuple[MeetingExtraction, str] | None:
-    path = cache_path(transcript)
+def load_extraction(transcript: Transcript, directory: Path) -> tuple[MeetingExtraction, str] | None:
+    path = cache_path(transcript, directory)
     if not path.exists():
         return None
     record = json.loads(path.read_text(encoding="utf-8"))

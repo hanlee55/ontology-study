@@ -5,21 +5,29 @@ python -m meeting_kg extract samples/xxx.txt         회의록 하나만 추출�
 python -m meeting_kg validate                        SHACL 검증
 python -m meeting_kg infer                           추론 전후 비교
 python -m meeting_kg query [이름|--list|--file x.rq] [--no-inference]
+python -m meeting_kg evaluate [--verbose] [--json result.json]   정답지 기준 채점
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
 from rdflib import RDF, Graph, URIRef
 from rdflib.query import Result, ResultRow
 
-from .config import ONT, QUERIES_DIR, ROOT
+from .config import ANSWER_KEY_FILE, EXTRACTED_DIR, GRAPH_FILE, ONT, QUERIES_DIR, ROOT
 from .pipeline import build, infer, load_graph, load_ttl, validate
+from .table import print_rows
 
 
 def cmd_build(args: argparse.Namespace) -> None:
-    graph = build(refresh=args.refresh, offline=args.offline)
+    graph = build(
+        refresh=args.refresh,
+        offline=args.offline,
+        extracted_dir=Path(args.extracted_dir),
+        graph_file=Path(args.output),
+    )
     conforms, _ = validate(graph)
     print("SHACL 검증:", "통과" if conforms else "위반 있음 (python -m meeting_kg validate 로 상세 확인)")
 
@@ -74,33 +82,7 @@ def read_query(path: Path) -> tuple[str, str]:
 def print_table(result: Result) -> None:
     headers = [str(v) for v in result.vars or []]
     rows = [["" if cell is None else str(cell) for cell in row] for row in result if isinstance(row, ResultRow)]
-    if not rows:
-        print("(결과 없음)\n")
-        return
-
-    def width(s: str) -> int:  # 한글은 터미널에서 두 칸을 차지
-        return sum(2 if ord(ch) > 0x1100 else 1 for ch in s)
-
-    def clip(s: str, limit: int = 60) -> str:
-        out, w = "", 0
-        for ch in s.replace("\n", " "):
-            w += width(ch)
-            if w > limit:
-                return out + "…"
-            out += ch
-        return out
-
-    rows = [[clip(c) for c in r] for r in rows]
-    widths = [max(width(h), *(width(r[i]) for r in rows)) for i, h in enumerate(headers)]
-
-    def pad(s: str, w: int) -> str:
-        return s + " " * (w - width(s))
-
-    print(" | ".join(pad(h, w) for h, w in zip(headers, widths, strict=True)))
-    print("-+-".join("-" * w for w in widths))
-    for r in rows:
-        print(" | ".join(pad(c, w) for c, w in zip(r, widths, strict=True)))
-    print(f"({len(rows)}행)\n")
+    print_rows(headers, rows)
 
 
 def cmd_query(args: argparse.Namespace) -> None:
@@ -128,6 +110,42 @@ def cmd_query(args: argparse.Namespace) -> None:
         print_table(graph.query(text))
 
 
+def cmd_evaluate(args: argparse.Namespace) -> None:
+    from .evaluate import evaluate, evaluation_to_dict, load_answer_key
+
+    graph = load_ttl(Path(args.graph)) if args.graph else load_graph()
+    result = evaluate(graph, load_answer_key(Path(args.key)))
+
+    correct, total = result.score
+    print(f"■ 총점: {correct}/{total} ({correct / total:.1%})\n")
+    rows = [[name, str(c), str(t), f"{c / t:.0%}" if t else "-"] for name, (c, t) in result.summary().items()]
+    print_rows(["범주", "맞음", "전체", "비율"], rows)
+
+    print("■ 추적 항목 (✔ 맞음, ✘ 틀림, · 선택 항목)")
+    item_rows = []
+    for r in result.tracked + result.facts:
+        failed = [c for c in r.checks if not c.ok]
+        if not args.verbose and not failed:
+            continue
+        mark = "·" if r.key.optional else ("✔" if not failed else "✘")
+        if r.match is None:
+            detail = "그래프에서 찾지 못함"
+        else:
+            shown = failed if failed else r.checks[1:]  # 첫 체크(항목 찾기)는 그래프 항목 칸에 이미 나타남
+            detail = "; ".join(f"{c.category} 기대 {c.expected} / 실제 {c.actual}" for c in shown)
+        item_rows.append([mark, r.key.id, r.key.summary, r.match.id if r.match else "-", detail])
+    print_rows(["", "정답", "내용", "그래프 항목", "틀린 체크"], item_rows, limit=70)
+
+    print(f"■ 중복 등록 {len(result.duplicates)}건 (이미 매칭된 정답과 같은 내용의 항목)")
+    print_rows(["그래프 항목", "정답", "설명"], [[i.id, k.id, i.description] for i, k in result.duplicates], limit=70)
+    print(f"■ 정답지에 없는 항목 {len(result.extras)}건")
+    print_rows(["그래프 항목", "종류", "설명"], [[i.id, i.kind, i.description] for i in result.extras], limit=70)
+
+    if args.json:
+        Path(args.json).write_text(json.dumps(evaluation_to_dict(result), ensure_ascii=False, indent=2) + "\n")
+        print(f"JSON 저장: {args.json}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="python -m meeting_kg", description="회의록 → 온톨로지 지식 그래프")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -135,6 +153,8 @@ def main() -> None:
     p = sub.add_parser("build", help="회의록을 추출해 그래프 생성")
     p.add_argument("--refresh", action="store_true", help="저장된 추출 결과를 무시하고 LLM을 다시 호출")
     p.add_argument("--offline", action="store_true", help="LLM을 호출하지 않고 저장된 추출 결과만 사용")
+    p.add_argument("--extracted-dir", default=str(EXTRACTED_DIR), help="추출 결과 JSON 폴더 (기본: extracted/)")
+    p.add_argument("--output", default=str(GRAPH_FILE), help="그래프 저장 파일 (기본: output/graph.ttl)")
     p.set_defaults(func=cmd_build)
 
     p = sub.add_parser("extract", help="회의록 하나를 추출해 JSON으로 출력")
@@ -150,6 +170,13 @@ def main() -> None:
     p.add_argument("--file", help="임의의 .rq 파일 실행")
     p.add_argument("--no-inference", action="store_true", help="추론 없이 저장된 트리플만으로 질의")
     p.set_defaults(func=cmd_query)
+
+    p = sub.add_parser("evaluate", help="정답지 기준으로 추출 정확도 채점")
+    p.add_argument("--key", default=str(ANSWER_KEY_FILE), help="정답지 TOML (기본: samples/answer_key.toml)")
+    p.add_argument("--graph", help="채점할 그래프 .ttl (기본: output/graph.ttl)")
+    p.add_argument("--verbose", action="store_true", help="맞은 항목도 모두 출력")
+    p.add_argument("--json", help="결과를 JSON 파일로 저장 (실행 간 비교용)")
+    p.set_defaults(func=cmd_evaluate)
 
     args = parser.parse_args()
     args.func(args)

@@ -9,8 +9,10 @@ from rdflib import Graph
 
 from .catalog import build_entity_catalog, build_tracked_items
 from .config import (
+    EXTRACTED_DIR,
     GRAPH_FILE,
     REFERENCE_FILE,
+    ROOT,
     SAMPLES_DIR,
     SCHEMA_FILE,
     SHAPES_FILE,
@@ -29,7 +31,13 @@ def load_ttl(*paths: Path) -> Graph:
     return g
 
 
-def build(refresh: bool = False, offline: bool = False, log: Callable[[str], None] = print) -> Graph:
+def build(
+    refresh: bool = False,
+    offline: bool = False,
+    extracted_dir: Path = EXTRACTED_DIR,
+    graph_file: Path = GRAPH_FILE,
+    log: Callable[[str], None] = print,
+) -> Graph:
     """회의록을 날짜순으로 처리해 그래프를 만든다.
 
     앞 회의에서 생긴 할 일이 다음 회의의 '기존 추적 항목'으로 LLM에 전달되므로
@@ -38,7 +46,7 @@ def build(refresh: bool = False, offline: bool = False, log: Callable[[str], Non
     graph = load_ttl(REFERENCE_FILE)
 
     for transcript in list_transcripts(SAMPLES_DIR):
-        cached = None if refresh else load_extraction(transcript)
+        cached = None if refresh else load_extraction(transcript, extracted_dir)
         if cached:
             extraction, model = cached
             log(f"[cache] {transcript.path.name}")
@@ -49,7 +57,7 @@ def build(refresh: bool = False, offline: bool = False, log: Callable[[str], Non
             log(f"[LLM  ] {transcript.path.name} 추출 중...")
             extraction = call_llm(transcript, build_entity_catalog(graph), build_tracked_items(graph))
             model = UPSTAGE_MODEL
-            save_extraction(transcript, extraction)
+            save_extraction(transcript, extraction, extracted_dir)
 
         warnings = apply_extraction(graph, transcript, extraction, model)
         log(
@@ -59,9 +67,10 @@ def build(refresh: bool = False, offline: bool = False, log: Callable[[str], Non
         for warning in warnings:
             log(f"        ⚠ {warning}")
 
-    GRAPH_FILE.parent.mkdir(parents=True, exist_ok=True)
-    graph.serialize(GRAPH_FILE, format="turtle")
-    log(f"저장: {GRAPH_FILE.relative_to(GRAPH_FILE.parent.parent)} ({len(graph)} 트리플)")
+    graph_file.parent.mkdir(parents=True, exist_ok=True)
+    graph.serialize(graph_file, format="turtle")
+    shown = graph_file.relative_to(ROOT) if graph_file.resolve().is_relative_to(ROOT) else graph_file
+    log(f"저장: {shown} ({len(graph)} 트리플)")
     return graph
 
 
