@@ -35,7 +35,9 @@ output/graph.ttl        지식 그래프 (Turtle)
     │
     ├─▶ SHACL 검증 (ontology/shapes.ttl)
     ├─▶ OWL 2 RL 추론 (ontology/schema.ttl + owlrl)
-    └─▶ SPARQL 질의 (queries/*.rq)
+    ├─▶ SPARQL 질의 (queries/*.rq)
+    ├─▶ wirelog 규칙 점검 (rules/checks.dl): 이벤트로 현재 상태 계산, 모순·이상 징후 탐지
+    └─▶ 정답지 채점 (samples/answer_key.toml)
 ```
 
 ## 디렉터리 구조
@@ -49,6 +51,7 @@ output/graph.ttl        지식 그래프 (Turtle)
 | `extracted/` | LLM 추출 결과(JSON) 캐시 |
 | `output/graph.ttl` | 생성된 지식 그래프 |
 | `queries/` | 예제 SPARQL 질의 |
+| `rules/checks.dl` | wirelog Datalog 점검 규칙 |
 | `meeting_kg/` | Python 코드 |
 | `pyproject.toml`, `uv.lock` | 의존성 (uv로 관리) |
 | `ruff.toml`, `mypy.ini` | 린터·포맷터, 타입 검사 설정 |
@@ -107,6 +110,10 @@ uv run python -m meeting_kg query 02 --no-inference   # 추론 없이 실행 (�
 # 정답지 기준 채점
 uv run python -m meeting_kg evaluate              # 총점, 범주별 점수, 틀린 항목
 uv run python -m meeting_kg evaluate --verbose    # 맞은 항목까지 모두
+
+# wirelog 규칙 점검
+uv run python -m meeting_kg check                 # 모순·이상 징후 목록
+uv run python -m meeting_kg check --timeline      # 회의를 하나씩 넣으며 회의별 변경 내역
 ```
 
 새 회의록은 `samples/`에 같은 형식으로 추가하고 `build`를 실행하면 됩니다.
@@ -248,6 +255,60 @@ uv run python -m meeting_kg evaluate --graph runs/exp1/graph.ttl --json runs/exp
 - **자주 틀린 것**
   - 내부 회의에서 강예린이 "오늘 오후에 회신드리겠다"고 한 할 일(A11)을 재추출 두 번 모두 놓쳤습니다.
   - 상대 날짜 계산: "이번 주 금요일"(10/06 기준 10/09)을 세 번 중 두 번 10/10으로 계산했습니다.
+
+## wirelog 규칙 점검
+
+[wirelog](https://github.com/semantic-reasoning/wirelog)는 C11로 만든 증분(incremental) Datalog 엔진입니다. Python 바인딩 [PyreWire](https://github.com/semantic-reasoning/PyreWire)로 사용합니다.
+
+RDF/OWL은 스키마·저장·질의를 그대로 맡습니다. wirelog는 그 옆에서 **상태 변경 이벤트로 현재 상태를 계산**하고, **사람이 확인해야 할 모순과 이상 징후**를 찾습니다. `meeting_kg/rules.py`가 그래프를 Datalog 사실(관계)로 내보내 `rules/checks.dl`을 실행합니다.
+
+### 규칙
+
+| 규칙 | 찾는 것 |
+|---|---|
+| `current_status`, `current_due` | 상태·기한 변경 이벤트 중 마지막 것이 이기는 방식(Last-Write-Wins)으로 계산한 현재 값 |
+| `status_mismatch`, `due_mismatch` | 그래프에 저장된 현재 값과 이벤트로 계산한 값의 차이 (변환 코드 오류) |
+| `status_conflict`, `due_conflict` | 같은 회의 안에서 상태나 기한이 엇갈림 |
+| `unattended_change` | 담당자(또는 담당 부서원)가 아무도 참석하지 않은 회의에서 상태·기한이 바뀜 |
+| `reopened` | 완료됐던 일이 나중에 다시 열림 |
+| `overdue` | 마지막 회의 날짜 기준으로 기한이 지났는데 끝나지 않음 |
+| `weekend_due` | 기한이 토·일요일 ("이번 주 금요일" 같은 상대 날짜 계산 오류 가능성) |
+| `duplicate_candidate` | 같은 고객사·같은 기능에 대해 다른 회의에서 또 만들어진 요청·이슈 |
+
+규칙 예시 (현재 상태와 불참 회의 변경):
+
+```prolog
+last_status_seq(I, max(S)) :- status_event(I, S, _, _).
+current_status(I, St) :- last_status_seq(I, S), status_event(I, S, St, _).
+
+unattended_change(I, M) :-
+    updated_in(I, M), has_assignee(I), !created_in(I, M), !assignee_present(I, M).
+```
+
+`check --timeline`은 회의를 하나씩 넣고 `step()`으로 증분 계산합니다. 그래서 각 회의가 **바꾼 결과만** 나옵니다. 예를 들어 2차 회의 시점에 기한이 지났던 견적서 할 일은 3차 회의에서 완료가 보고되면 `overdue`에서 빠집니다.
+
+### 효과: 채점기가 찾은 실제 오류를 정답지 없이 미리 표시하는가
+
+커밋된 결과와 재추출 2회, 세 그래프에서 채점 결과(`evaluate`)와 대조했습니다.
+
+| 실제 오류 (채점기 기준) | 잡은 규칙 | 결과 |
+|---|---|---|
+| "이번 주 금요일"을 10/10(토)로 계산 | `weekend_due` | 이 오류가 있던 그래프 2개 모두에서 잡음 |
+| SSO 기술 검토가 관계없는 다솜병원 회의에서 갱신됨 (기한 10/15 오류) | `unattended_change` | 잡음 |
+| 보안 검토 기한이 한 회의 안에서 11/13 → 10/30으로 엇갈림 | `due_conflict` | 잡음 |
+| SSO 요청이 한 회의 안에서 "진행 중"과 "보류"로 함께 기록됨 | `status_conflict` | 잡음 (run1) |
+| 고객 요청 중복 등록 4건 | `duplicate_candidate` | 3건 잡음 |
+| 할 일·이슈 중복 등록 3건 | (대상 아님) | 못 잡음 |
+| 할 일 자체를 놓침 (A11, A13 등) | (없는 것은 규칙으로 못 찾음) | 못 잡음 |
+
+**오탐(정상인데 표시된 것)도 있습니다.** 그래서 이 결과는 자동 수정이 아니라 **사람의 검토 목록**으로 써야 합니다.
+- `unattended_change`: 다른 사람이 대신 전한 완료 보고("민수 님 견적서는 지난 금요일에 나갔대요")도 표시합니다.
+- `weekend_due`: 가온물산은 토요일에만 작업할 수 있어서 12/12(토) 기한은 정상입니다.
+- `duplicate_candidate`: run1에서 같은 기능을 다룬 다른 요청 3쌍을 중복으로 표시했습니다.
+
+### 라이선스
+
+wirelog 코어 엔진은 LGPL-3.0과 상용 라이선스 중 선택하는 이중 라이선스이고, PyreWire는 Apache-2.0과 GPL-3.0 이상 중 선택하는 이중 라이선스입니다. 상용으로 쓰려면 조건을 확인해야 합니다.
 
 ### 알려진 한계
 
