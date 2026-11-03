@@ -1,0 +1,347 @@
+# 샘플 회의록 정답지
+#
+# 사람이 기대하는 추출 결과입니다. `uv run python -m meeting_kg evaluate`가 이 파일을 기준으로
+# output/graph.ttl을 채점합니다. 파이프라인은 samples/*.txt만 읽으므로 이 파일은 추출 대상이 아닙니다.
+#
+# [[tracked]]  할 일(ActionItem) · 고객 요청(CustomerRequest) · 이슈(Issue)
+#   meeting    처음 등장하는 회의 날짜. 그래프 항목도 이 회의에서 생성되어야 매칭됩니다.
+#   keywords   설명(description)에 모두 들어 있어야 하는 단어. "a|b"는 둘 중 하나. 띄어쓰기는 무시합니다.
+#   exclude    설명에 들어 있으면 매칭하지 않는 단어
+#   assignees  담당자 ID (data/reference.ttl)
+#   customer   고객 요청의 요청 고객사 ID
+#   due        최종 기한
+#   status     회의 날짜별로 기대하는 상태. 목록이면 그중 하나면 정답
+#   optional   true면 찾지 못해도 감점하지 않고, 찾으면 "정답에 없는 항목"으로 세지 않습니다.
+#
+# [[decisions]], [[knowledge]]  회의와 관계없이 그래프 전체에서 키워드로 찾습니다.
+#
+# ID: A=할 일, R=고객 요청, I=이슈, D=결정, K=지식. 상태: open, in_progress, blocked, done, cancelled
+
+# ---------------------------------------------------------------------------
+# M1 2026-10-06 가온물산 주간 미팅 (Docs)
+# ---------------------------------------------------------------------------
+
+[[tracked]]
+id = "I1"
+kind = "Issue"
+meeting = "2026-10-06"
+summary = "100MB 넘는 파일 업로드 실패"
+keywords = ["업로드"]
+status = { "2026-10-06" = "open", "2026-10-20" = "in_progress", "2026-10-27" = "done" }
+
+[[tracked]]
+id = "R1"
+kind = "CustomerRequest"
+meeting = "2026-10-06"
+summary = "Docs SSO 연동 (연말 감사 전 필수)"
+keywords = ["SSO"]
+customer = "cust-gaon"
+status = { "2026-10-06" = "open", "2026-10-20" = "blocked", "2026-10-27" = "in_progress" }
+note = "10/20: 가온이 테스트 IdP 메타데이터를 보내지 않아 보류. 10/27: 메타데이터 수신 후 재개"
+
+[[tracked]]
+id = "R2"
+kind = "CustomerRequest"
+meeting = "2026-10-06"
+summary = "감사 로그 엑셀 내려받기 (급하지 않음)"
+keywords = ["감사로그"]
+customer = "cust-gaon"
+status = { "2026-10-06" = "open", "2026-10-20" = ["open", "in_progress"], "2026-10-27" = "in_progress" }
+note = "10/20 내부 회의에서 11월 말 CSV 배포 결정(D2), 10/27 고객에게 안내"
+
+[[tracked]]
+id = "A1"
+kind = "ActionItem"
+meeting = "2026-10-06"
+summary = "박지훈: 업로드 오류 1차 원인 분석 (오늘 오후)"
+keywords = ["업로드|타임아웃", "분석"]
+assignees = ["emp-park-jihun"]
+due = "2026-10-06"
+status = { "2026-10-06" = "open" }
+
+[[tracked]]
+id = "A2"
+kind = "ActionItem"
+meeting = "2026-10-06"
+summary = "박지훈: 업로드 오류 패치 (10/16 → 10/23 연기)"
+keywords = ["패치"]
+exclude = ["공유", "안내"]
+assignees = ["emp-park-jihun"]
+due = "2026-10-23"
+status = { "2026-10-06" = "open", "2026-10-20" = ["open", "in_progress"], "2026-10-27" = "done" }
+note = "가온이 Docs 구버전을 써서 별도 빌드가 필요해 기한 연기"
+
+[[tracked]]
+id = "A3"
+kind = "ActionItem"
+meeting = "2026-10-06"
+summary = "이서연: 온프레미스 기준 SSO 기술 검토 (다음 주 화요일)"
+keywords = ["기술검토"]
+assignees = ["emp-lee-seoyeon"]
+due = "2026-10-13"
+status = { "2026-10-06" = "open", "2026-10-20" = "done" }
+
+[[tracked]]
+id = "A4"
+kind = "ActionItem"
+meeting = "2026-10-06"
+summary = "김민수: SSO 견적 + 증설 견적 (이번 주 금요일)"
+keywords = ["견적", "SSO|엔터프라이즈"]
+assignees = ["emp-kim-minsu"]
+due = "2026-10-09"
+status = { "2026-10-06" = "open", "2026-10-20" = "done" }
+
+[[tracked]]
+id = "A4b"
+kind = "ActionItem"
+meeting = "2026-10-06"
+summary = "김민수: 증설 견적 (A4와 따로 추출해도 됨)"
+keywords = ["증설", "견적"]
+assignees = ["emp-kim-minsu"]
+due = "2026-10-09"
+status = { "2026-10-06" = "open", "2026-10-20" = "done" }
+optional = true
+
+[[tracked]]
+id = "A5"
+kind = "ActionItem"
+meeting = "2026-10-06"
+summary = "이서연: 감사 로그 내보내기 로드맵 확인 (잠정, 기한 없음)"
+keywords = ["로드맵"]
+assignees = ["emp-lee-seoyeon"]
+status = { "2026-10-06" = "open", "2026-10-20" = "done" }
+
+[[decisions]]
+id = "D1"
+meeting = "2026-10-06"
+summary = "SSO는 SAML 2.0으로 진행"
+keywords = ["SAML"]
+
+[[knowledge]]
+id = "K1"
+meeting = "2026-10-06"
+summary = "가온물산은 온프레미스 설치형만 허용 (클라우드 불가)"
+keywords = ["온프레미스"]
+
+[[knowledge]]
+id = "K2"
+meeting = "2026-10-06"
+summary = "가온물산 사용자 500명 → 내년 1분기 약 800명"
+keywords = ["800"]
+
+[[knowledge]]
+id = "K3"
+meeting = "2026-10-06"
+summary = "가온물산 연말 감사는 12월 중순"
+keywords = ["12월중순"]
+
+# ---------------------------------------------------------------------------
+# M2 2026-10-13 다솜병원 월간 점검 (Sign)
+# ---------------------------------------------------------------------------
+
+[[tracked]]
+id = "R3"
+kind = "CustomerRequest"
+meeting = "2026-10-13"
+summary = "대량 서명 한도 200 → 1,000건 상향 (11월 검진 시즌 전)"
+keywords = ["대량|일괄"]
+customer = "cust-dasom"
+status = { "2026-10-13" = "open", "2026-10-20" = "in_progress" }
+
+[[tracked]]
+id = "R4"
+kind = "CustomerRequest"
+meeting = "2026-10-13"
+summary = "원장 보고용 서명 현황 대시보드 (약한 요청)"
+keywords = ["대시보드"]
+customer = "cust-dasom"
+optional = true
+
+[[tracked]]
+id = "A6"
+kind = "ActionItem"
+meeting = "2026-10-13"
+summary = "강예린: 건수 상향을 개발팀과 확인 후 회신 (잠정, 다음 주 중)"
+keywords = ["대량|일괄|건수|1,000|1000|천건"]
+assignees = ["emp-kang-yerin"]
+status = { "2026-10-13" = "open", "2026-10-20" = ["done", "in_progress"] }
+note = "10/20 내부 회의에서 D3로 답이 나옴. 회신 자체는 A11"
+
+[[tracked]]
+id = "A6b"
+kind = "ActionItem"
+meeting = "2026-10-13"
+summary = "박지훈: 건수 상향 서버 부하 테스트 (명시적 약속은 아님)"
+keywords = ["부하|서버|기술적"]
+assignees = ["emp-park-jihun"]
+optional = true
+
+[[tracked]]
+id = "A7"
+kind = "ActionItem"
+meeting = "2026-10-13"
+summary = "최유나: 신규 사용자 가이드 (이번 주 목요일)"
+keywords = ["가이드"]
+assignees = ["emp-choi-yuna"]
+due = "2026-10-15"
+status = { "2026-10-13" = "open", "2026-10-20" = "done" }
+
+[[tracked]]
+id = "A7b"
+kind = "ActionItem"
+meeting = "2026-10-13"
+summary = "강예린: 대시보드를 데이터팀과 상의 (기한 없는 비공식 약속)"
+keywords = ["대시보드"]
+assignees = ["emp-kang-yerin"]
+optional = true
+
+[[knowledge]]
+id = "K4"
+meeting = "2026-10-13"
+summary = "다솜병원 데이터·백업은 국내 리전에만"
+keywords = ["국내"]
+
+[[knowledge]]
+id = "K5"
+meeting = "2026-10-13"
+summary = "다솜병원 하루 서명 약 2,000~2,100건, 사용자 120명"
+keywords = ["120"]
+
+# ---------------------------------------------------------------------------
+# M3 2026-10-20 개발-영업 주간 싱크 (내부)
+# ---------------------------------------------------------------------------
+
+[[tracked]]
+id = "A8"
+kind = "ActionItem"
+meeting = "2026-10-20"
+summary = "김민수(\"그분\"): 한 부장에게 메타데이터 재요청 (내일)"
+keywords = ["메타데이터"]
+assignees = ["emp-kim-minsu"]
+due = "2026-10-21"
+status = { "2026-10-20" = "open", "2026-10-27" = "done" }
+
+[[tracked]]
+id = "A9"
+kind = "ActionItem"
+meeting = "2026-10-20"
+summary = "정하늘: SSO 설정 보안 검토 (10/30)"
+keywords = ["보안검토"]
+assignees = ["emp-jung-haneul"]
+due = "2026-10-30"
+status = { "2026-10-20" = "open" }
+
+[[tracked]]
+id = "A10"
+kind = "ActionItem"
+meeting = "2026-10-20"
+summary = "이서연: 가온에 새 패치 일정 공유 (오늘)"
+keywords = ["패치", "공유|안내|전달"]
+assignees = ["emp-lee-seoyeon"]
+due = "2026-10-20"
+status = { "2026-10-20" = "open" }
+
+[[tracked]]
+id = "A11"
+kind = "ActionItem"
+meeting = "2026-10-20"
+summary = "강예린: 윤 과장에게 건수 상향 일정 회신 (오늘 오후)"
+keywords = ["회신|안내|전달|공유", "대량|일괄|건수|1,000|1000|천건"]
+assignees = ["emp-kang-yerin"]
+due = "2026-10-20"
+status = { "2026-10-20" = "open" }
+
+[[tracked]]
+id = "A12"
+kind = "ActionItem"
+meeting = "2026-10-20"
+summary = "송태호: 다솜 Insight 대시보드 시범 범위 정리 (다음 주 화요일)"
+keywords = ["시범"]
+assignees = ["emp-song-taeho"]
+due = "2026-10-27"
+status = { "2026-10-20" = "open" }
+
+[[decisions]]
+id = "D2"
+meeting = "2026-10-20"
+summary = "감사 로그 내보내기를 앞당겨 11월 말 CSV로 배포"
+keywords = ["CSV"]
+
+[[decisions]]
+id = "D3"
+meeting = "2026-10-20"
+summary = "대량 서명 한도 1,000건 상향, 11월 둘째 주 정기 배포"
+keywords = ["1,000|1000|천건"]
+
+[[knowledge]]
+id = "K6"
+meeting = "2026-10-20"
+summary = "외부 IdP 연동 Docs 고객은 세션 타임아웃 30분 이하 (전 고객 공통)"
+keywords = ["30분"]
+
+[[knowledge]]
+id = "K7"
+meeting = "2026-10-20"
+summary = "Insight 차기 버전 12월 출시, Sign 위젯 포함"
+keywords = ["12월", "위젯"]
+
+# ---------------------------------------------------------------------------
+# M4 2026-10-27 가온물산 주간 미팅 후속 점검
+# ---------------------------------------------------------------------------
+
+[[tracked]]
+id = "A13"
+kind = "ActionItem"
+meeting = "2026-10-27"
+summary = "박지훈: SSO 연동 테스트 완료 (11/13)"
+keywords = ["테스트"]
+exclude = ["진행상황"]
+assignees = ["emp-park-jihun"]
+due = "2026-11-13"
+status = { "2026-10-27" = ["open", "in_progress"] }
+
+[[tracked]]
+id = "A14"
+kind = "ActionItem"
+meeting = "2026-10-27"
+summary = "김민수: 계약서 초안 (다음 주 화요일)"
+keywords = ["계약서"]
+assignees = ["emp-kim-minsu"]
+due = "2026-11-03"
+status = { "2026-10-27" = "open" }
+
+[[tracked]]
+id = "A15"
+kind = "ActionItem"
+meeting = "2026-10-27"
+summary = "김민수: 다음 주 SSO 테스트 진행 상황 공유"
+keywords = ["진행상황"]
+assignees = ["emp-kim-minsu"]
+optional = true
+
+[[tracked]]
+id = "A16"
+kind = "ActionItem"
+meeting = "2026-10-27"
+summary = "박지훈: 12월 둘째 주 토요일 작업 창에 반영 (D4를 할 일로 추출한 경우)"
+keywords = ["토요일|작업창"]
+assignees = ["emp-park-jihun"]
+optional = true
+
+[[decisions]]
+id = "D4"
+meeting = "2026-10-27"
+summary = "SSO와 내보내기 기능을 12월 둘째 주 토요일 작업 창에 함께 반영"
+keywords = ["토요일|작업창"]
+
+[[knowledge]]
+id = "K8"
+meeting = "2026-10-27"
+summary = "가온물산은 매월 둘째 주 토요일에만 온프레미스 업데이트 가능"
+keywords = ["토요일|작업창"]
+
+[[knowledge]]
+id = "K9"
+meeting = "2026-10-27"
+summary = "증설 800명은 내년 1월 1일부터"
+keywords = ["1월1일"]
