@@ -20,7 +20,7 @@ from typing import Any
 
 from rdflib import RDF, Graph, Literal, URIRef
 
-from .catalog import STATUS_NAMES, TRACKED_CLASSES, short_id, uri_subjects, uri_value
+from .catalog import STATUS_NAMES, TRACKED_CLASSES, short_id, update_seq, uri_subjects, uri_value
 from .config import ONT
 
 FACT_CLASSES = {"Decision": ONT.Decision, "KnowledgeNote": ONT.KnowledgeNote}
@@ -123,12 +123,6 @@ def _meeting_date(g: Graph, meeting: URIRef | None) -> dt.date | None:
     return _date_value(g, meeting, ONT.meetingDate) if meeting is not None else None
 
 
-def _update_seq(update: URIRef) -> int:
-    """한 회의 안에서 몇 번째 갱신인지. to_rdf가 upd-…-20261020, upd-…-20261020-2 순으로 만든다."""
-    last = short_id(update).rsplit("-", 1)[-1]
-    return 1 if len(last) == 8 else int(last)
-
-
 def load_graph_items(g: Graph) -> list[GraphItem]:
     items = []
     for kind, cls in TRACKED_CLASSES.items():
@@ -138,7 +132,7 @@ def load_graph_items(g: Graph) -> list[GraphItem]:
                 when = _meeting_date(g, uri_value(g, update, ONT.recordedIn))
                 status = uri_value(g, update, ONT.newStatus)
                 if when is not None and status in STATUS_NAMES:
-                    history.append((when, _update_seq(update), STATUS_NAMES[status]))
+                    history.append((when, update_seq(update), STATUS_NAMES[status]))
             customer = uri_value(g, uri, ONT.requestedBy)
             items.append(
                 GraphItem(

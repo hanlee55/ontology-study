@@ -64,6 +64,12 @@ def uri_value(graph: Graph, subject: Node, predicate: Node) -> URIRef | None:
     return value if isinstance(value, URIRef) else None
 
 
+def update_seq(update: URIRef) -> int:
+    """한 회의 안에서 몇 번째 상태 변경인지. to_rdf가 upd-…-20261020, upd-…-20261020-2 순으로 만든다."""
+    last = short_id(update).rsplit("-", 1)[-1]
+    return 1 if len(last) == 8 else int(last)
+
+
 def label_of(graph: Graph, uri: Node) -> str:
     label = graph.value(uri, RDFS.label) or graph.value(uri, ONT.description)
     return str(label) if label is not None else str(uri).removeprefix(str(EX))
