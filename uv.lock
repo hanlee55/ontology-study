@@ -349,6 +349,7 @@ dependencies = [
     { name = "openai" },
     { name = "owlrl" },
     { name = "pydantic" },
+    { name = "pyrewire" },
     { name = "pyshacl" },
     { name = "python-dotenv" },
     { name = "rdflib" },
@@ -365,6 +366,7 @@ requires-dist = [
     { name = "openai", specifier = ">=3.42.1" },
     { name = "owlrl", specifier = ">=7.6.2" },
     { name = "pydantic", specifier = ">=2.14.2" },
+    { name = "pyrewire", specifier = ">=1.1.3" },
     { name = "pyshacl", specifier = ">=0.40.2" },
     { name = "python-dotenv", specifier = ">=1.2.4" },
     { name = "rdflib", specifier = ">=7.6.0" },
@@ -529,6 +531,20 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e4/11/b213bebff182584360cb8d17c72c1677fec5c5c228de439e63bcf8ab1c8f/pyparsing-3.3.3.tar.gz", hash = "sha256:928ae7e20211f3b6f3915a72f06a0cfd29ab9d24279dd6346b6b1a7146397d36", size = 1050487, upload-time = "2026-09-20T20:59:05.609Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/38/bb/d215ee7c73b61497b28a5503f9f53523f294fcc936762b7caf90e0c1c2b5/pyparsing-3.3.3-py3-none-any.whl", hash = "sha256:ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4", size = 126420, upload-time = "2026-09-20T20:59:04.025Z" },
+]
+
+[[package]]
+name = "pyrewire"
+version = "1.1.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/19/a6/ed87b0f042f41c5f7034e61f5fa618589e2997a9fd031c91e7548ece7e93/pyrewire-1.1.3.tar.gz", hash = "sha256:3cb98ef63c7f7cada94a9c082e703a51b92f565bec1f9f5de196d9b85e706858", size = 160428, upload-time = "2026-10-25T05:36:34.044Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c9/1a/7b484a9ca60a11edcaf6c09552795057b28a5cec38f95aa80e1b7568cd06/pyrewire-1.1.3-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:8440b028e5a781c8aa5d0da6e8a696ac85320c1bf7de61e3bdf9ab99df00ae09", size = 356866, upload-time = "2026-10-25T05:36:25.44Z" },
+    { url = "https://files.pythonhosted.org/packages/86/a5/c1e7ce2ab3ec379482fff47a558cc11f0c7ca2a808d5dd01afd25d61d3f3/pyrewire-1.1.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c5e9da98847849dc365fe9944dc29febce5442edade371117141936b8748d1c9", size = 379199, upload-time = "2026-10-25T05:36:26.913Z" },
+    { url = "https://files.pythonhosted.org/packages/3f/70/f185177eb7912d312850932baa710695319a1435f742d3d1171c8cce8bd8/pyrewire-1.1.3-cp314-cp314-win_amd64.whl", hash = "sha256:bb41629d0765e3320486fc460d3f5f192230b7ca83f3157ec8790451766f468e", size = 421880, upload-time = "2026-10-25T05:36:28.407Z" },
+    { url = "https://files.pythonhosted.org/packages/be/b0/1e5ae32931935efe89f99fe680b900c0c1a0ebc33a4e694ea063fa76ae31/pyrewire-1.1.3-cp315-cp315-macosx_11_0_arm64.whl", hash = "sha256:422023b9d10c22b3ea879ab3ec1088cd02032c01a45ce43d641ac42030ab9830", size = 356868, upload-time = "2026-10-25T05:36:29.801Z" },
+    { url = "https://files.pythonhosted.org/packages/7b/8b/8285bb0d8061956b687d2e4c2d00be5f7bce84501ea77403c0969dcc8d91/pyrewire-1.1.3-cp315-cp315-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:528f950646753bf55faeda11b9d00ff312d13b3680af42cf1448bfd5b3e45b51", size = 379201, upload-time = "2026-10-25T05:36:31.09Z" },
+    { url = "https://files.pythonhosted.org/packages/bf/e5/b9545f331cb3194655fa3b29fd6b009ae1512c1361531ecf84975cef8284/pyrewire-1.1.3-cp315-cp315-win_amd64.whl", hash = "sha256:a413d618f0a8c0d12dd0c6abc430760eb5709c60a430f04779dfb672d9b62072", size = 421880, upload-time = "2026-10-25T05:36:32.551Z" },
 ]
 
 [[package]]
