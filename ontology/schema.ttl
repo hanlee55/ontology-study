@@ -1,0 +1,336 @@
+@prefix ont:  <https://example.org/ontology-study/ont#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# =============================================================================
+# 회의록 기반 업무 지식 온톨로지 (스키마 / TBox)
+#
+#   영역 1. 서비스 지식      : Service, Feature
+#   영역 2. 고객사 지식      : Customer, CustomerContact
+#   영역 3. 사람·부서·업무   : Employee, Department, ActionItem, Decision,
+#                              CustomerRequest, Issue, StatusUpdate(히스토리)
+#   공통.   출처(Provenance) : Meeting, evidence, confidence, extractedBy
+# =============================================================================
+
+<https://example.org/ontology-study/ont>
+    a owl:Ontology ;
+    rdfs:label "Meeting Knowledge Ontology"@en , "회의 지식 온톨로지"@ko ;
+    owl:versionInfo "0.1.0" .
+
+# -----------------------------------------------------------------------------
+# 조직과 사람
+# -----------------------------------------------------------------------------
+
+ont:Agent a owl:Class ;
+    rdfs:label "행위자"@ko ;
+    rdfs:comment "할 일을 맡거나 요청을 할 수 있는 주체 (사람 또는 조직)."@ko .
+
+ont:Person a owl:Class ;
+    rdfs:subClassOf ont:Agent ;
+    rdfs:label "사람"@ko .
+
+ont:Employee a owl:Class ;
+    rdfs:subClassOf ont:Person ;
+    rdfs:label "직원"@ko ;
+    rdfs:comment "우리 회사 소속 직원."@ko .
+
+ont:CustomerContact a owl:Class ;
+    rdfs:subClassOf ont:Person ;
+    rdfs:label "고객 담당자"@ko ;
+    rdfs:comment "고객사 소속으로 우리와 소통하는 사람."@ko .
+
+ont:Organization a owl:Class ;
+    rdfs:subClassOf ont:Agent ;
+    rdfs:label "조직"@ko .
+
+ont:Department a owl:Class ;
+    rdfs:subClassOf ont:Organization ;
+    rdfs:label "부서"@ko .
+
+ont:Customer a owl:Class ;
+    rdfs:subClassOf ont:Organization ;
+    rdfs:label "고객사"@ko .
+
+# 서로 겹칠 수 없는 클래스 (추론기가 모순을 찾을 수 있음)
+ont:Person owl:disjointWith ont:Organization .
+ont:Employee owl:disjointWith ont:CustomerContact .
+ont:Department owl:disjointWith ont:Customer .
+
+ont:memberOf a owl:ObjectProperty ;
+    rdfs:label "소속"@ko ;
+    rdfs:domain ont:Employee ;
+    rdfs:range ont:Department .
+
+ont:hasMember a owl:ObjectProperty ;
+    rdfs:label "구성원"@ko ;
+    owl:inverseOf ont:memberOf .
+
+ont:subOrganizationOf a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "상위 조직"@ko ;
+    rdfs:comment "팀 → 본부 → 회사. 전이적이므로 팀은 회사의 하위 조직으로도 추론된다."@ko ;
+    rdfs:domain ont:Department ;
+    rdfs:range ont:Department .
+
+ont:worksFor a owl:ObjectProperty ;
+    rdfs:label "근무처"@ko ;
+    rdfs:domain ont:CustomerContact ;
+    rdfs:range ont:Customer .
+
+ont:jobTitle a owl:DatatypeProperty ;
+    rdfs:label "직책"@ko ;
+    rdfs:domain ont:Person ;
+    rdfs:range xsd:string .
+
+ont:accountManagerOf a owl:ObjectProperty ;
+    rdfs:label "고객사 담당"@ko ;
+    rdfs:domain ont:Employee ;
+    rdfs:range ont:Customer .
+
+ont:hasAccountManager a owl:ObjectProperty ;
+    rdfs:label "담당 영업"@ko ;
+    owl:inverseOf ont:accountManagerOf .
+
+ont:ownerOf a owl:ObjectProperty ;
+    rdfs:label "서비스 담당 부서"@ko ;
+    rdfs:domain ont:Department ;
+    rdfs:range ont:Service .
+
+# -----------------------------------------------------------------------------
+# 서비스
+# -----------------------------------------------------------------------------
+
+ont:Service a owl:Class ;
+    rdfs:label "서비스"@ko ;
+    rdfs:comment "우리 회사가 제공하는 제품·서비스."@ko .
+
+ont:Feature a owl:Class ;
+    rdfs:label "기능"@ko ;
+    rdfs:comment "서비스의 세부 기능. 기존 기능이거나 고객이 요청한 신규 기능."@ko .
+
+ont:Service owl:disjointWith ont:Feature .
+
+ont:featureOf a owl:ObjectProperty ;
+    rdfs:label "소속 서비스"@ko ;
+    rdfs:domain ont:Feature ;
+    rdfs:range ont:Service .
+
+ont:hasFeature a owl:ObjectProperty ;
+    rdfs:label "기능"@ko ;
+    owl:inverseOf ont:featureOf .
+
+ont:uses a owl:ObjectProperty ;
+    rdfs:label "사용 중"@ko ;
+    rdfs:domain ont:Customer ;
+    rdfs:range ont:Service .
+
+ont:usedBy a owl:ObjectProperty ;
+    rdfs:label "사용 고객사"@ko ;
+    owl:inverseOf ont:uses .
+
+# -----------------------------------------------------------------------------
+# 회의 (모든 지식의 출처)
+# -----------------------------------------------------------------------------
+
+ont:Meeting a owl:Class ;
+    rdfs:label "회의"@ko .
+
+ont:meetingDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "회의 일자"@ko ;
+    rdfs:domain ont:Meeting ;
+    rdfs:range xsd:date .
+
+ont:participant a owl:ObjectProperty ;
+    rdfs:label "참석자"@ko ;
+    rdfs:domain ont:Meeting ;
+    rdfs:range ont:Person .
+
+ont:aboutCustomer a owl:ObjectProperty ;
+    rdfs:label "관련 고객사"@ko ;
+    rdfs:domain ont:Meeting ;
+    rdfs:range ont:Customer .
+
+ont:summary a owl:DatatypeProperty ;
+    rdfs:label "요약"@ko ;
+    rdfs:range xsd:string .
+
+ont:sourceFile a owl:DatatypeProperty ;
+    rdfs:label "원본 파일"@ko ;
+    rdfs:range xsd:string .
+
+# -----------------------------------------------------------------------------
+# 회의에서 추출되는 항목
+# -----------------------------------------------------------------------------
+
+ont:ExtractedItem a owl:Class ;
+    rdfs:label "추출 항목"@ko ;
+    rdfs:comment "회의록에서 LLM이 추출한 모든 항목의 상위 클래스. 출처 정보를 반드시 가진다."@ko .
+
+ont:TrackedItem a owl:Class ;
+    rdfs:subClassOf ont:ExtractedItem ;
+    rdfs:label "추적 항목"@ko ;
+    rdfs:comment "상태가 있고 시간에 따라 변하는 항목. 변경 내역은 StatusUpdate로 남긴다."@ko .
+
+ont:ActionItem a owl:Class ;
+    rdfs:subClassOf ont:TrackedItem ;
+    rdfs:label "할 일"@ko .
+
+ont:CustomerRequest a owl:Class ;
+    rdfs:subClassOf ont:TrackedItem ;
+    rdfs:label "고객 요청"@ko .
+
+ont:Issue a owl:Class ;
+    rdfs:subClassOf ont:TrackedItem ;
+    rdfs:label "이슈"@ko ;
+    rdfs:comment "장애, 버그, 불만 등 해결이 필요한 문제."@ko .
+
+ont:Decision a owl:Class ;
+    rdfs:subClassOf ont:ExtractedItem ;
+    rdfs:label "결정사항"@ko .
+
+ont:KnowledgeNote a owl:Class ;
+    rdfs:subClassOf ont:ExtractedItem ;
+    rdfs:label "지식 메모"@ko ;
+    rdfs:comment "서비스·고객사·사람에 대해 회의에서 알게 된 사실. 예: '가온물산은 온프레미스 설치만 허용한다'."@ko .
+
+ont:ActionItem owl:disjointWith ont:CustomerRequest , ont:Issue .
+ont:CustomerRequest owl:disjointWith ont:Issue .
+
+ont:description a owl:DatatypeProperty ;
+    rdfs:label "내용"@ko ;
+    rdfs:range xsd:string .
+
+ont:assignedTo a owl:ObjectProperty ;
+    rdfs:label "담당"@ko ;
+    rdfs:domain ont:TrackedItem ;
+    rdfs:range ont:Agent .
+
+ont:responsibleFor a owl:ObjectProperty ;
+    rdfs:label "맡은 일"@ko ;
+    owl:inverseOf ont:assignedTo .
+
+ont:dueDate a owl:DatatypeProperty ;
+    rdfs:label "기한"@ko ;
+    rdfs:domain ont:TrackedItem ;
+    rdfs:range xsd:date .
+
+ont:relatesTo a owl:ObjectProperty ;
+    rdfs:label "관련 대상"@ko ;
+    rdfs:comment "고객사, 서비스, 기능, 다른 항목 등 무엇이든 될 수 있다."@ko ;
+    rdfs:domain ont:ExtractedItem .
+
+ont:requestedBy a owl:ObjectProperty ;
+    rdfs:label "요청 고객사"@ko ;
+    rdfs:domain ont:CustomerRequest ;
+    rdfs:range ont:Customer .
+
+ont:reportedBy a owl:ObjectProperty ;
+    rdfs:label "제기 주체"@ko ;
+    rdfs:domain ont:Issue ;
+    rdfs:range ont:Agent .
+
+ont:affects a owl:ObjectProperty ;
+    rdfs:label "영향 대상"@ko ;
+    rdfs:domain ont:Issue .
+
+ont:priority a owl:ObjectProperty ;
+    rdfs:label "우선순위"@ko ;
+    rdfs:range ont:Priority .
+
+ont:about a owl:ObjectProperty ;
+    rdfs:label "주제"@ko ;
+    rdfs:domain ont:KnowledgeNote .
+
+ont:decidedBy a owl:ObjectProperty ;
+    rdfs:label "결정 주체"@ko ;
+    rdfs:domain ont:Decision ;
+    rdfs:range ont:Agent .
+
+# -----------------------------------------------------------------------------
+# 상태와 히스토리
+#
+#   TrackedItem의 ont:status 는 "현재 상태" 하나만 가진다.
+#   상태가 바뀔 때마다 StatusUpdate 이벤트를 새로 만들어 이력을 보존한다.
+# -----------------------------------------------------------------------------
+
+ont:Status a owl:Class ;
+    rdfs:label "상태"@ko .
+
+ont:Open       a ont:Status ; rdfs:label "신규"@ko , "open"@en .
+ont:InProgress a ont:Status ; rdfs:label "진행중"@ko , "in_progress"@en .
+ont:Blocked    a ont:Status ; rdfs:label "보류"@ko , "blocked"@en .
+ont:Done       a ont:Status ; rdfs:label "완료"@ko , "done"@en .
+ont:Cancelled  a ont:Status ; rdfs:label "취소"@ko , "cancelled"@en .
+
+ont:Priority a owl:Class ;
+    rdfs:label "우선순위"@ko .
+
+ont:High   a ont:Priority ; rdfs:label "높음"@ko , "high"@en .
+ont:Medium a ont:Priority ; rdfs:label "보통"@ko , "medium"@en .
+ont:Low    a ont:Priority ; rdfs:label "낮음"@ko , "low"@en .
+
+ont:status a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "현재 상태"@ko ;
+    rdfs:domain ont:TrackedItem ;
+    rdfs:range ont:Status .
+
+ont:StatusUpdate a owl:Class ;
+    rdfs:label "상태 변경 이력"@ko ;
+    rdfs:comment "어떤 회의에서, 어떤 항목의 상태·기한이 어떻게 바뀌었는지 기록하는 이벤트."@ko .
+
+ont:updateOf a owl:ObjectProperty ;
+    rdfs:label "대상 항목"@ko ;
+    rdfs:domain ont:StatusUpdate ;
+    rdfs:range ont:TrackedItem .
+
+ont:hasUpdate a owl:ObjectProperty ;
+    rdfs:label "변경 이력"@ko ;
+    owl:inverseOf ont:updateOf .
+
+ont:newStatus a owl:ObjectProperty ;
+    rdfs:label "변경된 상태"@ko ;
+    rdfs:domain ont:StatusUpdate ;
+    rdfs:range ont:Status .
+
+ont:newDueDate a owl:DatatypeProperty ;
+    rdfs:label "변경된 기한"@ko ;
+    rdfs:domain ont:StatusUpdate ;
+    rdfs:range xsd:date .
+
+ont:note a owl:DatatypeProperty ;
+    rdfs:label "비고"@ko ;
+    rdfs:range xsd:string .
+
+# -----------------------------------------------------------------------------
+# 출처 (Provenance)
+# -----------------------------------------------------------------------------
+
+ont:mentionedIn a owl:ObjectProperty ;
+    rdfs:label "언급된 회의"@ko ;
+    rdfs:range ont:Meeting .
+
+ont:createdIn a owl:ObjectProperty ;
+    rdfs:subPropertyOf ont:mentionedIn ;
+    rdfs:label "처음 등장한 회의"@ko ;
+    rdfs:range ont:Meeting .
+
+ont:recordedIn a owl:ObjectProperty ;
+    rdfs:subPropertyOf ont:mentionedIn ;
+    rdfs:label "기록된 회의"@ko ;
+    rdfs:domain ont:StatusUpdate ;
+    rdfs:range ont:Meeting .
+
+ont:evidence a owl:DatatypeProperty ;
+    rdfs:label "근거 발언"@ko ;
+    rdfs:comment "회의록 원문에서 그대로 인용한 근거."@ko ;
+    rdfs:range xsd:string .
+
+ont:confidence a owl:DatatypeProperty ;
+    rdfs:label "추출 신뢰도"@ko ;
+    rdfs:range xsd:decimal .
+
+ont:extractedBy a owl:DatatypeProperty ;
+    rdfs:label "추출 모델"@ko ;
+    rdfs:range xsd:string .

@@ -1,0 +1,156 @@
+@prefix ont:  <https://example.org/ontology-study/ont#> .
+@prefix ex:   <https://example.org/ontology-study/id/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# =============================================================================
+# 기준 데이터 (가상의 회사 "누리클라우드")
+#
+# 조직도, 서비스 목록, 고객사 목록을 미리 등록해 둔다.
+# LLM은 회의록에서 사람·고객사·서비스를 찾으면 이 목록의 ID 중에서 고르게 된다.
+# skos:altLabel 은 회의에서 실제로 불리는 별칭이다. (엔티티 정규화에 사용)
+# =============================================================================
+
+# ---- 부서 -------------------------------------------------------------------
+
+ex:dept-nuri a ont:Department ;
+    rdfs:label "누리클라우드" ;
+    skos:altLabel "우리 회사" , "누리" .
+
+ex:dept-sales-hq a ont:Department ;
+    rdfs:label "영업본부" ;
+    ont:subOrganizationOf ex:dept-nuri .
+
+ex:dept-sales1 a ont:Department ;
+    rdfs:label "영업1팀" ;
+    ont:subOrganizationOf ex:dept-sales-hq .
+
+ex:dept-sales2 a ont:Department ;
+    rdfs:label "영업2팀" ;
+    ont:subOrganizationOf ex:dept-sales-hq .
+
+ex:dept-dev-hq a ont:Department ;
+    rdfs:label "개발본부" ;
+    ont:subOrganizationOf ex:dept-nuri .
+
+ex:dept-platform a ont:Department ;
+    rdfs:label "플랫폼팀" ;
+    skos:altLabel "플랫폼" , "개발팀" ;
+    ont:subOrganizationOf ex:dept-dev-hq ;
+    ont:ownerOf ex:svc-docs , ex:svc-sign .
+
+ex:dept-data a ont:Department ;
+    rdfs:label "데이터팀" ;
+    ont:subOrganizationOf ex:dept-dev-hq ;
+    ont:ownerOf ex:svc-insight .
+
+ex:dept-security a ont:Department ;
+    rdfs:label "보안팀" ;
+    ont:subOrganizationOf ex:dept-dev-hq .
+
+ex:dept-cs a ont:Department ;
+    rdfs:label "고객지원팀" ;
+    skos:altLabel "CS팀" , "CS" ;
+    ont:subOrganizationOf ex:dept-nuri .
+
+# ---- 직원 -------------------------------------------------------------------
+
+ex:emp-kim-minsu a ont:Employee ;
+    rdfs:label "김민수" ;
+    skos:altLabel "민수 님" , "김 책임" , "민수 책임" ;
+    ont:jobTitle "책임" ;
+    ont:memberOf ex:dept-sales1 ;
+    ont:accountManagerOf ex:cust-gaon .
+
+ex:emp-kang-yerin a ont:Employee ;
+    rdfs:label "강예린" ;
+    skos:altLabel "예린 님" , "강 매니저" ;
+    ont:jobTitle "매니저" ;
+    ont:memberOf ex:dept-sales2 ;
+    ont:accountManagerOf ex:cust-dasom .
+
+ex:emp-lee-seoyeon a ont:Employee ;
+    rdfs:label "이서연" ;
+    skos:altLabel "서연 팀장님" , "이 팀장" , "팀장님" ;
+    ont:jobTitle "팀장" ;
+    ont:memberOf ex:dept-platform .
+
+ex:emp-park-jihun a ont:Employee ;
+    rdfs:label "박지훈" ;
+    skos:altLabel "지훈 님" , "박 선임" ;
+    ont:jobTitle "선임" ;
+    ont:memberOf ex:dept-platform .
+
+ex:emp-jung-haneul a ont:Employee ;
+    rdfs:label "정하늘" ;
+    skos:altLabel "하늘 님" , "정 책임" ;
+    ont:jobTitle "책임" ;
+    ont:memberOf ex:dept-security .
+
+ex:emp-choi-yuna a ont:Employee ;
+    rdfs:label "최유나" ;
+    skos:altLabel "유나 님" , "최 매니저" ;
+    ont:jobTitle "매니저" ;
+    ont:memberOf ex:dept-cs .
+
+ex:emp-song-taeho a ont:Employee ;
+    rdfs:label "송태호" ;
+    skos:altLabel "태호 님" , "송 수석" ;
+    ont:jobTitle "수석" ;
+    ont:memberOf ex:dept-data .
+
+# ---- 서비스와 기능 ----------------------------------------------------------
+
+ex:svc-docs a ont:Service ;
+    rdfs:label "누리 Docs" ;
+    skos:altLabel "Docs" , "독스" , "문서관리" , "DMS" ;
+    rdfs:comment "클라우드 문서 관리 서비스" .
+
+ex:svc-sign a ont:Service ;
+    rdfs:label "누리 Sign" ;
+    skos:altLabel "Sign" , "사인" , "전자서명" ;
+    rdfs:comment "전자 서명 서비스" .
+
+ex:svc-insight a ont:Service ;
+    rdfs:label "누리 Insight" ;
+    skos:altLabel "Insight" , "인사이트" , "분석 대시보드" ;
+    rdfs:comment "데이터 분석 대시보드 서비스" .
+
+ex:feat-docs-sso a ont:Feature ;
+    rdfs:label "누리 Docs SSO 연동" ;
+    skos:altLabel "SSO" , "싱글 사인온" , "SSO 연동" ;
+    ont:featureOf ex:svc-docs .
+
+ex:feat-docs-audit a ont:Feature ;
+    rdfs:label "누리 Docs 감사 로그" ;
+    skos:altLabel "감사 로그" , "audit log" ;
+    ont:featureOf ex:svc-docs .
+
+ex:feat-sign-bulk a ont:Feature ;
+    rdfs:label "누리 Sign 대량 서명" ;
+    skos:altLabel "대량 서명" , "일괄 서명" ;
+    ont:featureOf ex:svc-sign .
+
+# ---- 고객사와 고객 담당자 ---------------------------------------------------
+
+ex:cust-gaon a ont:Customer ;
+    rdfs:label "가온물산" ;
+    skos:altLabel "가온" , "가온 쪽" , "가온물산 IT팀" ;
+    ont:uses ex:svc-docs .
+
+ex:cust-dasom a ont:Customer ;
+    rdfs:label "다솜병원" ;
+    skos:altLabel "다솜" , "병원 쪽" ;
+    ont:uses ex:svc-sign .
+
+ex:contact-han-doyun a ont:CustomerContact ;
+    rdfs:label "한도윤" ;
+    skos:altLabel "한 부장님" , "도윤 부장님" ;
+    ont:jobTitle "IT팀 부장" ;
+    ont:worksFor ex:cust-gaon .
+
+ex:contact-yoon-chaewon a ont:CustomerContact ;
+    rdfs:label "윤채원" ;
+    skos:altLabel "윤 과장님" , "채원 과장님" ;
+    ont:jobTitle "원무과 과장" ;
+    ont:worksFor ex:cust-dasom .

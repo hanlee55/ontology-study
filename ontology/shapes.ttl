@@ -1,0 +1,126 @@
+@prefix ont:  <https://example.org/ontology-study/ont#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# =============================================================================
+# SHACL 검증 규칙
+#
+# OWL은 "열린 세계 가정"이라 값이 없어도 오류로 보지 않는다.
+# "할 일에는 담당자가 반드시 있어야 한다" 같은 데이터 품질 규칙은 SHACL로 검사한다.
+#
+# 주의: 검증은 OWL 추론 "없이" 저장된 데이터에 대해 수행한다.
+# 추론을 먼저 돌리면 rdfs:range 규칙 때문에 잘못된 값도 "그 클래스"로 추론되어
+# sh:class 검사가 항상 통과해 버린다. (예: requestedBy 에 고객 담당자를 넣으면
+#  추론기는 "그 사람은 Customer다"라고 결론 내림)
+# 하위 클래스 관계(rdfs:subClassOf)는 SHACL이 스키마 그래프를 참고해 자동으로 따라간다.
+# =============================================================================
+
+ont:ExtractedItemShape a sh:NodeShape ;
+    sh:targetClass ont:ExtractedItem ;
+    sh:property [
+        sh:path ont:description ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "추출 항목에는 내용(description)이 정확히 하나 있어야 합니다." ;
+    ] , [
+        sh:path ont:mentionedIn ;
+        sh:minCount 1 ;
+        sh:class ont:Meeting ;
+        sh:message "추출 항목은 출처 회의(mentionedIn)를 가져야 합니다." ;
+    ] , [
+        sh:path ont:evidence ;
+        sh:minCount 1 ;
+        sh:message "추출 항목에는 근거 발언(evidence)이 있어야 합니다." ;
+    ] , [
+        sh:path ont:confidence ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ; sh:maxInclusive 1 ;
+        sh:message "신뢰도(confidence)는 0~1 사이 값 하나여야 합니다." ;
+    ] .
+
+ont:TrackedItemShape a sh:NodeShape ;
+    sh:targetClass ont:TrackedItem ;
+    sh:property [
+        sh:path ont:status ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class ont:Status ;
+        sh:message "추적 항목은 현재 상태(status)를 정확히 하나 가져야 합니다." ;
+    ] , [
+        sh:path ont:dueDate ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:message "기한(dueDate)은 날짜 하나여야 합니다." ;
+    ] , [
+        sh:path ont:assignedTo ;
+        sh:or ( [ sh:class ont:Employee ] [ sh:class ont:Department ] ) ;
+        sh:message "담당자는 우리 회사 직원이나 부서여야 합니다 (고객 담당자 불가)." ;
+    ] , [
+        sh:path [ sh:inversePath ont:updateOf ] ;  # 이 항목을 가리키는 StatusUpdate
+        sh:minCount 1 ;
+        sh:message "추적 항목에는 최소 한 개의 상태 이력(StatusUpdate)이 있어야 합니다." ;
+    ] .
+
+ont:ActionItemShape a sh:NodeShape ;
+    sh:targetClass ont:ActionItem ;
+    sh:property [
+        sh:path ont:assignedTo ;
+        sh:minCount 1 ;
+        sh:message "할 일(ActionItem)에는 담당자가 최소 한 명(또는 한 부서) 있어야 합니다." ;
+    ] .
+
+ont:CustomerRequestShape a sh:NodeShape ;
+    sh:targetClass ont:CustomerRequest ;
+    sh:property [
+        sh:path ont:requestedBy ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class ont:Customer ;
+        sh:message "고객 요청에는 요청한 고객사가 정확히 하나 있어야 합니다." ;
+    ] .
+
+ont:KnowledgeNoteShape a sh:NodeShape ;
+    sh:targetClass ont:KnowledgeNote ;
+    sh:property [
+        sh:path ont:about ;
+        sh:minCount 1 ;
+        sh:message "지식 메모는 대상(about)이 있어야 합니다." ;
+    ] .
+
+ont:StatusUpdateShape a sh:NodeShape ;
+    sh:targetClass ont:StatusUpdate ;
+    sh:property [
+        sh:path ont:updateOf ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class ont:TrackedItem ;
+    ] , [
+        sh:path ont:newStatus ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class ont:Status ;
+    ] , [
+        sh:path ont:recordedIn ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class ont:Meeting ;
+    ] .
+
+ont:MeetingShape a sh:NodeShape ;
+    sh:targetClass ont:Meeting ;
+    sh:property [
+        sh:path ont:meetingDate ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+    ] , [
+        sh:path ont:participant ;
+        sh:minCount 1 ;
+        sh:class ont:Person ;
+        sh:message "회의에는 참석자가 최소 한 명 있어야 하고, 참석자는 사람이어야 합니다." ;
+    ] .
+
+ont:EmployeeShape a sh:NodeShape ;
+    sh:targetClass ont:Employee ;
+    sh:property [
+        sh:path ont:memberOf ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class ont:Department ;
+        sh:message "직원은 소속 부서가 정확히 하나 있어야 합니다." ;
+    ] .
