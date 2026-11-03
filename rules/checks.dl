@@ -1,0 +1,115 @@
+// =============================================================================
+// 회의 지식 그래프 점검 규칙 (wirelog Datalog)
+//
+// RDF 그래프(output/graph.ttl)를 아래 입력 관계로 내보낸 뒤 이 규칙을 실행한다.
+// (meeting_kg/rules.py 가 내보내기와 실행을 맡는다)
+//
+// 시점 표기
+//   seq  : 회의 날짜 × 10 + 그 회의 안에서의 순번  (2026-10-20의 두 번째 변경 = 202610202)
+//   date : YYYYMMDD 정수                          (2026-10-23 = 20261023)
+// =============================================================================
+
+// ---- 입력 관계 (RDF에서 내보냄) ------------------------------------------------
+
+.decl meeting(m: symbol, date: int64)
+.decl attended(m: symbol, person: symbol)
+.decl member(person: symbol, dept: symbol)
+
+// 추적 항목: 종류(ActionItem / CustomerRequest / Issue)와 처음 등장한 회의
+.decl created(item: symbol, kind: symbol, m: symbol)
+.decl assigned(item: symbol, agent: symbol)
+.decl customer(item: symbol, cust: symbol)
+.decl target(item: symbol, x: symbol)
+
+// 상태 변경 이벤트 (StatusUpdate). 상태와 기한은 이벤트에서만 계산한다.
+.decl status_event(item: symbol, seq: int64, status: symbol, m: symbol)
+.decl due_event(item: symbol, seq: int64, due: int64, m: symbol)
+
+// RDF에 저장된 "현재 값" (to_rdf가 덮어쓴 값). 이벤트로 계산한 값과 대조한다.
+.decl stored_status(item: symbol, status: symbol)
+.decl stored_due(item: symbol, due: int64)
+
+// 피처(기능) 엔티티 목록. 중복 의심을 기능 단위로만 좁히는 데 쓴다.
+.decl feature(x: symbol)
+
+// 기한으로 나온 날짜 중 토·일요일 (wirelog에 날짜 함수가 없어 Python에서 계산해 넣음)
+.decl weekend(date: int64)
+
+// ---- 1. 현재 상태·기한: 마지막 이벤트가 이긴다 (Last-Write-Wins) ------------------
+
+.decl last_status_seq(item: symbol, seq: int64)
+last_status_seq(I, max(S)) :- status_event(I, S, _, _).
+
+.decl current_status(item: symbol, status: symbol)
+current_status(I, St) :- last_status_seq(I, S), status_event(I, S, St, _).
+
+.decl last_due_seq(item: symbol, seq: int64)
+last_due_seq(I, max(S)) :- due_event(I, S, _, _).
+
+.decl current_due(item: symbol, due: int64)
+current_due(I, D) :- last_due_seq(I, S), due_event(I, S, D, _).
+
+// 저장된 현재 값과 이벤트에서 계산한 값이 다르면 변환 코드의 버그다.
+.decl status_mismatch(item: symbol, stored: symbol, derived: symbol)
+status_mismatch(I, A, B) :- stored_status(I, A), current_status(I, B), A != B.
+
+.decl due_mismatch(item: symbol, stored: int64, derived: int64)
+due_mismatch(I, A, B) :- stored_due(I, A), current_due(I, B), A != B.
+
+// ---- 2. 같은 회의 안에서 상태·기한이 엇갈림 ------------------------------------------
+
+.decl status_conflict(item: symbol, m: symbol, first: symbol, later: symbol)
+status_conflict(I, M, A, B) :- status_event(I, S1, A, M), status_event(I, S2, B, M), S1 < S2, A != B.
+
+.decl due_conflict(item: symbol, m: symbol, first: int64, later: int64)
+due_conflict(I, M, A, B) :- due_event(I, S1, A, M), due_event(I, S2, B, M), S1 < S2, A != B.
+
+// ---- 3. 담당자가 아무도 참석하지 않은 회의에서 상태·기한이 바뀜 ---------------------
+//
+// 담당이 부서면 그 부서원이 참석했는지 본다. 처음 등장한 회의는 제외한다
+// (불참자에게 일을 맡기는 것은 흔하다. 예: "그분이 내일까지 요청하기로 했어요").
+
+.decl updated_in(item: symbol, m: symbol)
+updated_in(I, M) :- status_event(I, _, _, M).
+updated_in(I, M) :- due_event(I, _, _, M).
+
+.decl assignee_present(item: symbol, m: symbol)
+assignee_present(I, M) :- updated_in(I, M), assigned(I, P), attended(M, P).
+assignee_present(I, M) :- updated_in(I, M), assigned(I, D), member(P, D), attended(M, P).
+
+.decl has_assignee(item: symbol)
+has_assignee(I) :- assigned(I, _).
+
+.decl unattended_change(item: symbol, m: symbol)
+unattended_change(I, M) :-
+    updated_in(I, M), has_assignee(I), !created_in(I, M), !assignee_present(I, M).
+
+.decl created_in(item: symbol, m: symbol)
+created_in(I, M) :- created(I, _, M).
+
+// ---- 4. 완료됐던 일이 나중에 다시 열림 -------------------------------------------
+
+.decl reopened(item: symbol, done_seq: int64, later_seq: int64, status: symbol)
+reopened(I, S1, S2, St) :- status_event(I, S1, "done", _), status_event(I, S2, St, _), S1 < S2, St != "done".
+
+// ---- 5. 기한 초과: 마지막 회의 날짜 기준으로 기한이 지났는데 끝나지 않음 ---------------
+
+.decl as_of(date: int64)
+as_of(max(D)) :- meeting(_, D).
+
+.decl overdue(item: symbol, due: int64, status: symbol)
+overdue(I, D, St) :-
+    current_due(I, D), as_of(T), D < T, current_status(I, St), St != "done", St != "cancelled".
+
+// ---- 6. 기한이 주말: "이번 주 금요일" 같은 상대 날짜를 잘못 계산했을 가능성 -----------
+
+.decl weekend_due(item: symbol, due: int64)
+weekend_due(I, D) :- current_due(I, D), weekend(D).
+
+// ---- 7. 중복 의심: 같은 고객사의 같은 기능에 대해 다른 회의에서 만들어진 요청·이슈 -------
+
+.decl duplicate_candidate(first: symbol, later: symbol, cust: symbol, x: symbol)
+duplicate_candidate(I1, I2, C, X) :-
+    created(I1, K, M1), created(I2, K, M2), K != "ActionItem",
+    meeting(M1, D1), meeting(M2, D2), D1 < D2,
+    customer(I1, C), customer(I2, C), target(I1, X), target(I2, X), feature(X).

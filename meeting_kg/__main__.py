@@ -6,6 +6,7 @@ python -m meeting_kg validate                        SHACL 검증
 python -m meeting_kg infer                           추론 전후 비교
 python -m meeting_kg query [이름|--list|--file x.rq] [--no-inference]
 python -m meeting_kg evaluate [--verbose] [--json result.json]   정답지 기준 채점
+python -m meeting_kg check [--timeline]              wirelog 규칙으로 모순·이상 징후 점검
 """
 
 import argparse
@@ -18,7 +19,7 @@ from rdflib.query import Result, ResultRow
 
 from .config import ANSWER_KEY_FILE, EXTRACTED_DIR, GRAPH_FILE, ONT, QUERIES_DIR, ROOT
 from .pipeline import build, infer, load_graph, load_ttl, validate
-from .table import print_rows
+from .table import clip, print_rows
 
 
 def cmd_build(args: argparse.Namespace) -> None:
@@ -146,6 +147,52 @@ def cmd_evaluate(args: argparse.Namespace) -> None:
         print(f"JSON 저장: {args.json}")
 
 
+def cmd_check(args: argparse.Namespace) -> None:
+    from .catalog import label_of
+    from .config import EX
+    from .rules import CHECKS, run_checks, run_timeline
+
+    graph = load_ttl(Path(args.graph)) if args.graph else load_graph()
+
+    def show(value: object) -> str:
+        """항목·회의 ID에는 설명이나 제목을, 날짜 정수에는 날짜 형식을 붙인다."""
+        if isinstance(value, int):
+            text = str(value)
+            if len(text) == 8:
+                return f"{text[:4]}-{text[4:6]}-{text[6:]}"
+            if len(text) == 9:
+                return f"{text[:4]}-{text[4:6]}-{text[6:8]} #{text[8]}"
+            return text
+        uri = EX[str(value)]
+        if str(value).startswith("meeting-") or (uri, ONT.description, None) in graph:
+            return f"{value} {clip(label_of(graph, uri), 30)}"
+        return str(value)
+
+    if args.timeline:
+        names = ["current_status", *CHECKS]
+        current = None
+        rows: list[list[str]] = []
+        for delta in run_timeline(graph, names):
+            if delta.meeting != current:
+                if rows:
+                    print_rows(["", "관계", "내용"], rows, limit=90)
+                current, rows = delta.meeting, []
+                print(f"■ {delta.date} {show(delta.meeting)}")
+            sign = "+" if delta.diff > 0 else "-"
+            rows.append([sign, delta.relation, " / ".join(show(v) for v in delta.row)])
+        print_rows(["", "관계", "내용"], rows, limit=90)
+        return
+
+    results = run_checks(graph)
+    for name, (description, headers) in CHECKS.items():
+        found = results[name]
+        print(f"■ {description}: {len(found)}건  ({name})")
+        if found:
+            print_rows(headers, [[show(v) for v in row] for row in found], limit=60)
+        else:
+            print()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="python -m meeting_kg", description="회의록 → 온톨로지 지식 그래프")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -177,6 +224,11 @@ def main() -> None:
     p.add_argument("--verbose", action="store_true", help="맞은 항목도 모두 출력")
     p.add_argument("--json", help="결과를 JSON 파일로 저장 (실행 간 비교용)")
     p.set_defaults(func=cmd_evaluate)
+
+    p = sub.add_parser("check", help="wirelog 규칙으로 모순·이상 징후 점검 (rules/checks.dl)")
+    p.add_argument("--graph", help="점검할 그래프 .ttl (기본: output/graph.ttl)")
+    p.add_argument("--timeline", action="store_true", help="회의를 하나씩 넣으며 증분 계산한 변경 내역 출력")
+    p.set_defaults(func=cmd_check)
 
     args = parser.parse_args()
     args.func(args)

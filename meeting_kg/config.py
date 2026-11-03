@@ -15,6 +15,7 @@ ANSWER_KEY_FILE = SAMPLES_DIR / "answer_key.toml"
 EXTRACTED_DIR = ROOT / "extracted"
 OUTPUT_DIR = ROOT / "output"
 QUERIES_DIR = ROOT / "queries"
+RULES_FILE = ROOT / "rules" / "checks.dl"
 GRAPH_FILE = OUTPUT_DIR / "graph.ttl"
 INFERRED_FILE = OUTPUT_DIR / "graph_inferred.ttl"
 
